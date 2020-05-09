@@ -54,7 +54,7 @@ def extract_data(path, ann, onset):
   x = list(data.reshape(-1,))
   
   label_to_signal_mapping = {0:[], 1:[], 2:[], 3:[], 4:[], 5:[]}
-  for i in range(NUM_SEG_PROCESSED_PER_PATIENT):           
+  for i in range(len(onset)-1):           
     label = SLEEP_STAGES[ann[i]]
     #print(onset[i], onset[i+1], label)
     label_to_signal_mapping[label].append(x[SAMPLE_RATE * onset[i] : SAMPLE_RATE * onset[i+1]])

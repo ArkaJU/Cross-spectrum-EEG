@@ -47,7 +47,7 @@ def feature_gen(t1, s1, t2, s2):   #takes abs W12 as input
   f10 = np.sum(W12 ** 2)
   f11 = f10/(x+eps)
   f12 = np.sqrt(f11)
-  f13 = W12_sum/(np.exp(x)+eps)
+  #f13 = W12_sum/(np.exp(x)+eps)
   #f14 = 
   #f15 = f14/x
   #f16 = np.sqrt((f14**2)/x)
@@ -105,7 +105,7 @@ def feature_gen(t1, s1, t2, s2):   #takes abs W12 as input
 
   # f42 = R12_sum
 
-  f = [f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14]
+  f = [f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f14]
   F = []
   for i in f:
     F.append(i/1e4)
