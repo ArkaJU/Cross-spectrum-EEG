@@ -3,6 +3,8 @@ import time
 import resource
 import os
 import random
+import psutil
+import humanize
 from collections import Counter
 import h5py
 
@@ -22,7 +24,7 @@ class DatasetBuilder:
     self.size = size
     self.data_list = []
     self.ref_label = ref_label
-    self.ref_segments = np.load('/content/Cross-spectrum-EEG/reference_segments.npy', allow_pickle=True).reshape(-1, 1)[0][0]
+    self.ref_segments = np.load('/content/drive/My Drive/Cross-spectrum-EEG/reference_segments.npy', allow_pickle=True).reshape(-1, 1)[0][0]
     
     print(f"Refs loaded in {time.time()-start} seconds")
   
@@ -94,8 +96,10 @@ class DatasetBuilder:
     
     #print(f"RAM: {resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024} MB")   
     del tuples
-    print(f"RAM: {resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024} MB")   
-  
+    #print(f"RAM: {resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024} MB")   
+    process = psutil.Process(os.getpid())
+    print("Gen RAM Free: " + humanize.naturalsize( psutil.virtual_memory().available ), \
+          " | Proc size: " + humanize.naturalsize( process.memory_info().rss))
     for t in selected_tuples:
       yield t
 
@@ -123,8 +127,8 @@ class DatasetBuilder:
     print(f"segs_global: {np.unique(segs_global, return_counts=True)}")    #accumulating over all patients
 
 
-
-ref_label = 0
+print(f"Start time:{time.time()}")
+ref_label = 5
 dataset = DatasetBuilder(size=10, ref_label=ref_label)  #size->number of patients from which random segment  will be chosen
 
 dataset.create_dataset_of_particular_stage(num_segs_chosen=50)

@@ -2,16 +2,6 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 from constants import NUM_SLEEP_STAGES
 
-
-def softmax(z):
-  assert len(z.shape) == 2
-  s = np.max(z, axis=1)
-  s = s[:, np.newaxis] # necessary step to do broadcasting
-  e_x = np.exp(z - s)
-  div = np.sum(e_x, axis=1)
-  div = div[:, np.newaxis] # dito
-  return e_x / div
-  
 def get_len_dict(eeg_dict):  
   len_dict = {}
   for i in eeg_dict.keys():
@@ -49,15 +39,15 @@ def get_Y_test(dic):
     Y.append(tup[0]) 
   return Y
 
-def split_dataset(dic, svm_id):     
+def split_dataset(dic, clf_id):     
   """dic -> ref_label wise list of 
   (selected_seg_label, avg feature_vector of ref_label: selected_seg X ref_seg)
   
-  svm_id -> signifies which SVM this data is meant for
+  clf_id -> signifies which SVM this data is meant for
   """
   X = []
   Y = []
-  for tup in dic[svm_id]:   
+  for tup in dic[clf_id]:   
     Y.append(tup[0])
     X.append(tup[1])
 
@@ -65,20 +55,20 @@ def split_dataset(dic, svm_id):
   Y = np.array(Y)
   print("Original labels:")
   print(np.unique(Y, return_counts=True))
-  # print(f"svm_id:{svm_id}")
-  pos_indices = np.where(Y == svm_id)[0]
-  Y[np.where(Y != svm_id)[0].tolist()] = -1
-  Y[np.where(Y == svm_id)[0].tolist()] = 1
+  # print(f"clf_id:{clf_id}")
+  pos_indices = np.where(Y == clf_id)[0]
+  Y[np.where(Y != clf_id)[0].tolist()] = -1
+  Y[np.where(Y == clf_id)[0].tolist()] = 1
   Y[np.where(Y == -1)[0].tolist()] = 0
   assert np.all(np.where(Y == 1)[0] == pos_indices)
   print("Binarized labels:")
   print(np.unique(Y, return_counts=True))
   return X, Y
 
-def split_datalist(data_list, svm_id):     
+def split_datalist(data_list, clf_id):     
   """
   np.ndarray -> list of (selected_seg_label, avg feature_vector of ref_label: selected_seg X ref_seg)
-  svm_id -> signifies which SVM this data is meant for
+  clf_id -> signifies which SVM this data is meant for
   """
   #X = np.array(data_list[:, 1])
   X = np.array(list(data_list[:, 1]), dtype=np.float)
@@ -90,10 +80,10 @@ def split_datalist(data_list, svm_id):
   print("Original labels:")
   print(np.unique(Y, return_counts=True))
 
-  # print(f"svm_id:{svm_id}")
-  pos_indices = np.where(Y == svm_id)[0]
-  Y[np.where(Y != svm_id)[0].tolist()] = -1
-  Y[np.where(Y == svm_id)[0].tolist()] = 1
+  # print(f"clf_id:{clf_id}")
+  pos_indices = np.where(Y == clf_id)[0]
+  Y[np.where(Y != clf_id)[0].tolist()] = -1
+  Y[np.where(Y == clf_id)[0].tolist()] = 1
   Y[np.where(Y == -1)[0].tolist()] = 0
 
   assert np.all(np.where(Y == 1)[0] == pos_indices)
