@@ -11,5 +11,5 @@ TRAIN_ANN_PATH = r"/content/drive/My Drive/NSRR/Annotations/train/"
 TEST_DATA_PATH = r"/content/drive/My Drive/NSRR/Data/test/"
 TEST_ANN_PATH = r"/content/drive/My Drive/NSRR/Annotations/test/"
 
-NUM_CHOSEN_PATIENTS = 70
-REF_SEG_PER_CLASS = 2
+NUM_CHOSEN_PATIENTS = 10
+DURATION_OF_EACH_SEGMENT = 30 #seconds

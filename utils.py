@@ -53,16 +53,16 @@ def split_dataset(dic, clf_id):
 
   X = np.array(X)
   Y = np.array(Y)
-  print("Original labels:")
-  print(np.unique(Y, return_counts=True))
+  # print("Original labels:")
+  # print(np.unique(Y, return_counts=True))
   # print(f"clf_id:{clf_id}")
   pos_indices = np.where(Y == clf_id)[0]
   Y[np.where(Y != clf_id)[0].tolist()] = -1
   Y[np.where(Y == clf_id)[0].tolist()] = 1
   Y[np.where(Y == -1)[0].tolist()] = 0
   assert np.all(np.where(Y == 1)[0] == pos_indices)
-  print("Binarized labels:")
-  print(np.unique(Y, return_counts=True))
+  # print("Binarized labels:")
+  # print(np.unique(Y, return_counts=True))
   return X, Y
 
 def split_datalist(data_list, clf_id):     
@@ -77,8 +77,8 @@ def split_datalist(data_list, clf_id):
   #   Y.append(tup[0])
   #   X.append(tup[1])
 
-  print("Original labels:")
-  print(np.unique(Y, return_counts=True))
+  # print("Original labels:")
+  # print(np.unique(Y, return_counts=True))
 
   # print(f"clf_id:{clf_id}")
   pos_indices = np.where(Y == clf_id)[0]
@@ -88,10 +88,16 @@ def split_datalist(data_list, clf_id):
 
   assert np.all(np.where(Y == 1)[0] == pos_indices)
 
-  print("Binarized labels:")
-  print(np.unique(Y, return_counts=True))
+  # print("Binarized labels:")
+  # print(np.unique(Y, return_counts=True))
 
-  print(X.shape)
-  print(Y.shape)
+  # print(X.shape)
+  # print(Y.shape)
   
   return X, Y
+
+def preprocess(X):
+  #data = (X - np.min(X, axis=0))/(np.max(X, axis=0) - np.min(X, axis=0))
+  #data = X/np.max(X, axis=0)
+  data = (X - np.mean(X, axis=0))/np.std(X, axis=0)
+  return data
