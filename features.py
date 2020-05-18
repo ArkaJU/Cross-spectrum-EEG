@@ -1,10 +1,13 @@
 import numpy as np
 import pycwt as wavelet
+from utils import get_sums, get_sums2
 
 
-def feature_gen(t1, s1, t2, s2):   #takes abs W12 as input
-  
-  dt = np.diff(t1)[0]
+#def feature_gen(t1, s1, t2, s2):   
+def feature_gen(s1, s2): 
+
+  #dt = np.diff(t1)[0]
+  dt = 1    #apparently it is fixed
   W12, cross_coi, freq, signif= wavelet.xwt(s1, s2, dt, dj=1/24)
   #R12, aWCT, corr_coi, freq, sig = wavelet.wct(s1, s2, dt, dj=1/24, cache=True)
   #assert(W12.shape == R12.shape)  
@@ -15,13 +18,9 @@ def feature_gen(t1, s1, t2, s2):   #takes abs W12 as input
 
   total_scales = W12.shape[0]
   total_time = W12.shape[1]
-  
-  accum = 0
-  accum_sq = 0
-  for i in range(total_scales):
-    for j in range(total_time):
-      accum += i * j * W12[i, j]
-      accum_sq += i**2 * j**2 * W12[i, j]
+
+  #accum, accum_sq = get_sums2(total_scales, total_time, W12)
+  accum, accum_sq = get_sums(W12)
 
   W12_sum = np.sum(W12)
   #print(f"W12_sum:{W12_sum}")

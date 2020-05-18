@@ -39,7 +39,7 @@ def extract_anns(path):
 
   ann = annotations.description
   onset = onset.astype(np.int)
-  #raw.set_annotations(annotations)
+
 
   return ann, onset, duration
 
@@ -55,30 +55,30 @@ def extract_data(path, ann, onset, last_seg_duration, preprocess='std'):
 
   x = list(data.reshape(-1,))
   
-  label_to_signal_mapping = {0:[], 1:[], 2:[], 3:[], 4:[], 5:[]}
+  eeg_dict = {0:[], 1:[], 2:[], 3:[], 4:[], 5:[]}
   # for i in range(len(onset)-1):           
   #   label = SLEEP_STAGES[ann[i]]
   #   #print(onset[i], onset[i+1], label)
-  #   label_to_signal_mapping[label].append(x[SAMPLE_RATE * onset[i] : SAMPLE_RATE * onset[i+1]])
+  #   eeg_dict[label].append(x[SAMPLE_RATE * onset[i] : SAMPLE_RATE * onset[i+1]])
   for i in range(len(onset)-1):           
     label = SLEEP_STAGES[ann[i]]
     #print(onset[i], onset[i+1], label)
     for j in range(onset[i], onset[i+1], DURATION_OF_EACH_SEGMENT):
-      label_to_signal_mapping[label].append(x[j*SAMPLE_RATE:(j+DURATION_OF_EACH_SEGMENT)*SAMPLE_RATE])
+      eeg_dict[label].append(x[j*SAMPLE_RATE:(j+DURATION_OF_EACH_SEGMENT)*SAMPLE_RATE])
   
   #TAKING CARE OF THE LAST SEGMENT 
   #try-escept for the weird 'Unscored-9' stage in some patients
   try:
     last_label = SLEEP_STAGES[ann[-1]]
     for j in range(onset[-1], onset[-1]+int(last_seg_duration), DURATION_OF_EACH_SEGMENT):
-        label_to_signal_mapping[last_label].append(x[j*SAMPLE_RATE:(j+DURATION_OF_EACH_SEGMENT)*SAMPLE_RATE])
+        eeg_dict[last_label].append(x[j*SAMPLE_RATE : (j+DURATION_OF_EACH_SEGMENT)*SAMPLE_RATE])
   except KeyError:
     print("KeyError")
     pass
     
-  info = {}
+  info_dict = {}
   for i in range(NUM_SLEEP_STAGES):
-    info[SLEEP_STAGES_INV[i]] = len(label_to_signal_mapping[i])    #info regarding how many segments of each type in each patient's EEG
+    info_dict[SLEEP_STAGES_INV[i]] = len(eeg_dict[i])    #info regarding how many segments of each type in each patient's EEG
 
-  return label_to_signal_mapping, info   
+  return eeg_dict, info_dict   
 

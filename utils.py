@@ -2,6 +2,35 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 from constants import NUM_SLEEP_STAGES
 
+
+def get_sums(W):
+  path = '/content/drive/My Drive/Cross-spectrum-EEG/datasets/matrix_masks/'
+  
+  row_mask = np.load(path + 'row_mask.npy', allow_pickle=True)  #mask matrices have fixed shape for same scale and time i.shape/j.shape=(263,3750)
+  column_mask = np.load(path + 'column_mask.npy', allow_pickle=True)  #for dj=1/24 and 30 second segments
+  
+  accum = np.multiply(W, np.multiply(row_mask, column_mask))
+  accum = np.sum(accum)
+  accum_sq = np.multiply(W, np.multiply(row_mask**2, column_mask**2))
+  accum_sq = np.sum(accum_sq)
+  
+  return accum, accum_sq
+
+def get_sums2(total_scales, total_time, W):
+
+  ones = np.ones((total_scales, total_time))
+  x = np.arange(total_scales).reshape(-1, 1)
+  y = np.arange(total_time).reshape(1,-1)
+  i = np.multiply(ones, x).astype(int)
+  j = np.multiply(ones, y).astype(int)
+  accum = np.multiply(W, np.multiply(i, j))  #kind of masking
+  accum = np.sum(accum)
+  accum_sq = np.multiply(W, np.multiply(i**2, j**2))
+  accum_sq = np.sum(accum_sq)
+  
+  return accum, accum_sq
+
+
 def get_len_dict(eeg_dict):  
   len_dict = {}
   for i in eeg_dict.keys():

@@ -8,8 +8,7 @@ from constants import *
 patient_list = sorted(os.listdir(TRAIN_DATA_PATH))
 
 
-#a dict is said to to be fit if it has atleast min_seg_per_stage_reqd 
-#segments of each sleep stage
+#a dict is said to to be fit if it has atleast min_seg_per_stage_reqd segments of each sleep stage
 class FitDictFinder:
   
   def __init__(self, min_seg_per_stage_reqd):
@@ -40,7 +39,6 @@ class FitDictFinder:
     #return fit_dict_indices
 
 
-
 class ReferenceBuilder:
 
   def __init__(self, num_patients, num_segs_chosen_per_patient_per_stage):
@@ -50,9 +48,6 @@ class ReferenceBuilder:
 
 
   def get_ref_dicts(self):
-    fit_eeg_dicts = []
-    refs = []
-    ann_refs = []
 
     #indices of fit dicts, found beforehand, can use FitDictFinder class to get desired dicts
     fit_ref_list = [3, 10, 19, 21, 22, 26, 28, 33, 36, 38, 40, 42, 43, 51, 52, 53, 55, 56, 57, 60, 62,\
@@ -70,12 +65,8 @@ class ReferenceBuilder:
       print(ref)
       print(ann_ref)
 
-      yield eeg_dict
+      yield eeg_dict   
 
-      
-
-    print(len(fit_eeg_dicts))
-    return fit_eeg_dicts      
 
   def each_reference_data(self, eeg_dict):
     for label in range(NUM_SLEEP_STAGES):
@@ -84,6 +75,7 @@ class ReferenceBuilder:
       for s in seg_indices:
         self.reference_segments[label].append(eeg_dict[label][s])
     print()
+
 
   def build_refs(self):
     fit_eeg_dict_generator = self.get_ref_dicts()
