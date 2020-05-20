@@ -2,23 +2,18 @@ import numpy as np
 import pycwt as wavelet
 from utils import get_sums, get_sums2
 
-
 #def feature_gen(t1, s1, t2, s2):   
+#@profile
 def feature_gen(s1, s2): 
 
   #dt = np.diff(t1)[0]
   dt = 1    #apparently it is fixed
-  W12, cross_coi, freq, signif= wavelet.xwt(s1, s2, dt, dj=1/24)
-  #R12, aWCT, corr_coi, freq, sig = wavelet.wct(s1, s2, dt, dj=1/24, cache=True)
-  #assert(W12.shape == R12.shape)  
-  # print(W12)
-  # print("****************************************")
-  W12 = np.abs(W12)   #row->scale, col->time
-  # print(W12)
+  W12, cross_coi, freq, signif = wavelet.xwt(s1, s2, dt, dj=1/12)
+  W12 = np.abs(W12)  #row->scale, col->time
+  #print(W12.dtype)
 
   total_scales = W12.shape[0]
   total_time = W12.shape[1]
-
   #accum, accum_sq = get_sums2(total_scales, total_time, W12)
   accum, accum_sq = get_sums(W12)
 

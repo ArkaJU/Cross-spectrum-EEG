@@ -2,8 +2,10 @@ import mne
 from xml.etree import ElementTree
 import numpy as np
 from constants import *
+from line_profiler import LineProfiler
 
 #for reading annotations from xml file
+
 def extract_anns(path):
   def parse_nsrr_annotations(file_path):
     tree = ElementTree.parse(file_path)
@@ -45,15 +47,16 @@ def extract_anns(path):
 
 
 #getting the EEG data for each patient->outputs labelwise dict of segments of EEG and another info dict
+#@profile
 def extract_data(path, ann, onset, last_seg_duration, preprocess='std'):
   raw = mne.io.read_raw_edf(path, verbose=False)
-  row_idx = np.array([2])      #taking 3rd channel(EEG)
-  data = raw.get_data()
-  data = data[row_idx, :]
+
+  data = raw.get_data(picks=['EEG(sec)'])    #taking 3rd channel(EEG)
+  
   if preprocess=='norm': data = (data - np.min(data))/(np.max(data) - np.min(data))      #normalizing, using unique stats for each patient
   if preprocess=='std': data = (data - np.mean(data))/np.std(data)
 
-  x = list(data.reshape(-1,))
+  x = data.tolist()[0]
   
   eeg_dict = {0:[], 1:[], 2:[], 3:[], 4:[], 5:[]}
   # for i in range(len(onset)-1):           
@@ -67,7 +70,7 @@ def extract_data(path, ann, onset, last_seg_duration, preprocess='std'):
       eeg_dict[label].append(x[j*SAMPLE_RATE:(j+DURATION_OF_EACH_SEGMENT)*SAMPLE_RATE])
   
   #TAKING CARE OF THE LAST SEGMENT 
-  #try-escept for the weird 'Unscored-9' stage in some patients
+  #try-except for the weird 'Unscored-9' stage in some patients
   try:
     last_label = SLEEP_STAGES[ann[-1]]
     for j in range(onset[-1], onset[-1]+int(last_seg_duration), DURATION_OF_EACH_SEGMENT):

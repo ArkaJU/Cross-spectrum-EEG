@@ -2,9 +2,9 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 from constants import NUM_SLEEP_STAGES
 
-
+#@profile
 def get_sums(W):
-  path = '/content/drive/My Drive/Cross-spectrum-EEG/datasets/matrix_masks/'
+  path = '/content/matrix_masks/'
   
   row_mask = np.load(path + 'row_mask.npy', allow_pickle=True)  #mask matrices have fixed shape for same scale and time i.shape/j.shape=(263,3750)
   column_mask = np.load(path + 'column_mask.npy', allow_pickle=True)  #for dj=1/24 and 30 second segments
@@ -16,6 +16,8 @@ def get_sums(W):
   
   return accum, accum_sq
 
+
+#@profile
 def get_sums2(total_scales, total_time, W):
 
   ones = np.ones((total_scales, total_time))
@@ -36,6 +38,7 @@ def get_len_dict(eeg_dict):
   for i in eeg_dict.keys():
     len_dict[i] = len(eeg_dict[i])
   print("{" + "\n".join("{!r}: {!r},".format(k, v) for k, v in len_dict.items()) + "}")
+
 
 def get_X_test(dic):
   X_0 = []
@@ -61,12 +64,14 @@ def get_X_test(dic):
   X = [X_0, X_1, X_2, X_3, X_4, X_5]
   return X
 
+
 def get_Y_test(dic):
   svm_id = np.random.randint(NUM_SLEEP_STAGES) #emphasizing that it doesn't  matter which ref label we'll use because the label of the randomly selected sample will be same for all keys in the dict
   Y = []
   for tup in dic[svm_id]:   
     Y.append(tup[0]) 
   return Y
+
 
 def split_dataset(dic, clf_id):     
   """dic -> ref_label wise list of 
@@ -93,6 +98,7 @@ def split_dataset(dic, clf_id):
   # print("Binarized labels:")
   # print(np.unique(Y, return_counts=True))
   return X, Y
+
 
 def split_datalist(data_list, clf_id):     
   """
@@ -124,6 +130,7 @@ def split_datalist(data_list, clf_id):
   # print(Y.shape)
   
   return X, Y
+
 
 def preprocess(X):
   #data = (X - np.min(X, axis=0))/(np.max(X, axis=0) - np.min(X, axis=0))

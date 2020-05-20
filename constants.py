@@ -14,3 +14,5 @@ TEST_ANN_PATH = r"/content/drive/My Drive/NSRR/Annotations/test/"
 NUM_CHOSEN_PATIENTS = 10  #num_patients->number of patients from which random segment  will be chosen
 DURATION_OF_EACH_SEGMENT = 30 #seconds
 
+NUM_FEATURES = 13
+
