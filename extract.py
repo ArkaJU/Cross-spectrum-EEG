@@ -2,10 +2,8 @@ import mne
 from xml.etree import ElementTree
 import numpy as np
 from constants import *
-from line_profiler import LineProfiler
 
 #for reading annotations from xml file
-
 def extract_anns(path):
   def parse_nsrr_annotations(file_path):
     tree = ElementTree.parse(file_path)

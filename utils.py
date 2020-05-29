@@ -3,6 +3,19 @@ import numpy as np
 from constants import NUM_SLEEP_STAGES
 
 #@profile
+def correntropy(x, y):
+    #N = len(x)
+    X = preprocess(x)
+    Y = preprocess(y)
+    s = np.std(X, axis=0)
+    #print(f"std dev: {s}")
+    V = np.exp(-0.5*np.square(X - Y)/s**2)
+    #CIP = 0.0 # mean in feature space should be subtracted!!
+    #for i in range(0, N):
+        #CIP += np.average(np.exp(-0.5*(x- y[i])**2/s**2))/N
+    return V
+
+#@profile
 def get_sums(W):
   path = '/content/matrix_masks/'
   
