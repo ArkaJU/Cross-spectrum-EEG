@@ -1,11 +1,7 @@
-import numpy as np
-import time
-import resource
 import os
+import time
 import random
-import psutil
-import humanize
-from collections import Counter
+import numpy as np
 
 from extract import extract_anns, extract_data
 from constants import *
@@ -49,20 +45,37 @@ class DatasetBuilder:
 
     tuples = []    #all (label, segment)
     for label in eeg_dict.keys():
+      # flag = (label == 0  or label == 2)
       for seg in range(len_dict[label]): 
         tuples.append((int(label), eeg_dict[label][seg]))
+        # if flag and np.random.random() < 0.3:
+        #   tuples.append((int(label), eeg_dict[label][seg]))
+        # if not flag:
+        #   tuples.append((int(label), eeg_dict[label][seg]))
 
+    l = []
+    for t in tuples:
+      l.append(t[0])
+    print(f"tuples: {np.unique(l, return_counts=True)}")
     random.shuffle(tuples)
 
     selected_tuples = []
     for i in range(num_segs_chosen_per_patient):
-      selected_tuples.append(tuples.pop())   #popping after shuffling equivalent to sampling randomly
-    
+      selected_tuples.append(tuples.pop())
+      # t = tuples.pop()
+      # if t[0] == self.ref_label:
+      #   selected_tuples.append(t)   #popping after shuffling equivalent to sampling randomly
+      # if t[0] != self.ref_label and np.random.random()<0.2:
+      #   selected_tuples.append(t)
+
     del tuples
     
-    process = psutil.Process(os.getpid())
-    print("Gen RAM Free: " + humanize.naturalsize( psutil.virtual_memory().available ), \
-          " | Proc size: " + humanize.naturalsize( process.memory_info().rss))
+    l = []
+    for t in selected_tuples:
+      l.append(t[0])
+
+    print(f"selected_tuples: {np.unique(l, return_counts=True)}")
+
     for t in selected_tuples:
       yield t
 
@@ -176,7 +189,7 @@ train = True
 test = False
 
 if train == True:
-  ref_label = 1
+  ref_label = 0
   train_set = TrainDataset(ref_label=ref_label, num_patients=20)  
   train_set.create(num_segs_chosen_per_patient=50)
   np.save(f"clf{ref_label}.npy", train_set.trainset_list)

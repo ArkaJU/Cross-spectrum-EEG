@@ -1,9 +1,8 @@
 import numpy as np
 import pycwt as wavelet
-import cmath, math
-from utils import get_sums, get_sums2, correntropy
+from utils import get_sums, correntropy
 from sklearn.metrics.pairwise import cosine_similarity
-from scipy.stats import kurtosis,skew,moment,trim_mean
+from scipy.stats import kurtosis, skew, moment, trim_mean
 
 '''
 pycwt.xwt()
@@ -23,7 +22,6 @@ coi (array like) – Cone of influence, which is a vector of N points containing
 freqs (array like) – Vector of Fourier equivalent frequencies (in 1 / time units) that correspond to the wavelet scales.
 signif (array like) – Significance levels as a function of scale.
 '''
-ref_segments = np.load('/content/reference_segments.npy', allow_pickle=True).reshape(-1, 1)[0][0]
 
 #@profile
 def feature_gen(s1, s2):   
