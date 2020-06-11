@@ -48,9 +48,13 @@ def extract_anns(path):
 #@profile
 def extract_data(path, ann, onset, last_seg_duration, preprocess='std'):
   raw = mne.io.read_raw_edf(path, verbose=False)
-
-  data = raw.get_data(picks=['EEG(sec)'])    #taking 3rd channel(EEG)
   
+  try:
+    data = raw.get_data(picks=['EEG(sec)'])    #taking 3rd channel(EEG)
+  except ValueError:
+    print(f"Channel error at: {path}")
+    data = raw.get_data(picks=['EEG2']) 
+
   if preprocess=='norm': data = (data - np.min(data))/(np.max(data) - np.min(data))      #normalizing, using unique stats for each patient
   if preprocess=='std': data = (data - np.mean(data))/np.std(data)
 

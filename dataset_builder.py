@@ -13,7 +13,7 @@ class DatasetBuilder:
   
   #@profile
   def __init__(self): 
-    self.ref_segments = np.load('/content/reference_segments.npy', allow_pickle=True).reshape(-1, 1)[0][0]
+    self.ref_segments = np.load('/content/reference_segments_10.npy', allow_pickle=True).reshape(-1, 1)[0][0]
     print(f"Refs loaded in {time.time()-start} seconds")
     
   #@profile
@@ -53,10 +53,10 @@ class DatasetBuilder:
         # if not flag:
         #   tuples.append((int(label), eeg_dict[label][seg]))
 
-    l = []
-    for t in tuples:
-      l.append(t[0])
-    print(f"tuples: {np.unique(l, return_counts=True)}")
+    # l = []
+    # for t in tuples:
+    #   l.append(t[0])
+    # print(f"tuples: {np.unique(l, return_counts=True)}")
     random.shuffle(tuples)
 
     selected_tuples = []
@@ -70,11 +70,11 @@ class DatasetBuilder:
 
     del tuples
     
-    l = []
-    for t in selected_tuples:
-      l.append(t[0])
+    # l = []
+    # for t in selected_tuples:
+    #   l.append(t[0])
 
-    print(f"selected_tuples: {np.unique(l, return_counts=True)}")
+    # print(f"selected_tuples: {np.unique(l, return_counts=True)}")
 
     for t in selected_tuples:
       yield t
@@ -90,13 +90,13 @@ class DatasetBuilder:
       segment_tuple_generator = self.extract_random_segments_for_given_patient(patient_no=p, num_segs_chosen_per_patient=num_segs_chosen_per_patient)
       t1 = time.time()
       for i, selected_tuple in enumerate(segment_tuple_generator):
-        print(f"{i+1}. Selected label: {selected_tuple[0]}")
+        #print(f"{i+1}. Selected label: {selected_tuple[0]}")
         t2 = time.time()
         self.generate_features_with_ref_segments(selected_tuple, p)    #different for both the child classes
-        print(time.time()-t2)
-        print()
+        #print(time.time()-t2)
+        #print()
         segs.append(selected_tuple[0])  
-      print(time.time()-t1)
+      print(f"Time taken for this patient: {time.time()-t1}")
 
       segs_global.extend(segs)
       print(f"segs: {np.unique(segs, return_counts=True)}")  #for this patient only
@@ -145,7 +145,7 @@ class TestDataset(DatasetBuilder):
           return    #important, else the local s1(which is the source of Warning) will continue executing, thus calling the functions in except block again and again
       
       self.testset_dict[ref].append((selected_label, np.mean(F_avg, axis=0)))
-
+      np.save(f"test.npy", self.testset_dict)
 #************************************************************************************************************
 
 class TrainDataset(DatasetBuilder):
@@ -182,7 +182,7 @@ class TrainDataset(DatasetBuilder):
         return    #important, else the local s1(which is the source of Warning) will continue executing, thus calling the functions in except block again and again
       
     self.trainset_list.append((selected_label, np.mean(F_avg, axis=0)))
-
+    np.save(f"clf{self.ref_label}.npy", self.trainset_list)
 #************************************************************************************************************
 
 train = True
@@ -190,14 +190,14 @@ test = False
 
 if train == True:
   ref_label = 0
-  train_set = TrainDataset(ref_label=ref_label, num_patients=20)  
+  train_set = TrainDataset(ref_label=ref_label, num_patients=160)  
   train_set.create(num_segs_chosen_per_patient=50)
   np.save(f"clf{ref_label}.npy", train_set.trainset_list)
 
 
 if test == True:
-  test_set = TestDataset(num_patients=10)  
-  test_set.create(num_segs_chosen_per_patient=10)
+  test_set = TestDataset(num_patients=40)  
+  test_set.create(num_segs_chosen_per_patient=25)
   np.save(f"test.npy", test_set.testset_dict)
 
 

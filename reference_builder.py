@@ -87,8 +87,9 @@ class ReferenceBuilder:
 start = time.time()
 # fdf = FitDictFinder(min_seg_per_stage_reqd=1)
 # fdf.get_fit_dict_indices()
-
-ref_builder = ReferenceBuilder(num_patients=10, num_segs_chosen_per_patient_per_stage=1)
+num_patients=10
+num_segs_chosen_per_patient_per_stage=1
+ref_builder = ReferenceBuilder(num_patients=num_patients, num_segs_chosen_per_patient_per_stage=num_segs_chosen_per_patient_per_stage)
 ref_builder.build_refs()
-np.save('reference_segments.npy', ref_builder.reference_segments)
+np.save(f'reference_segments_{num_patients*num_segs_chosen_per_patient_per_stage}.npy', ref_builder.reference_segments)
 # print(f"Total time taken for reference building:{start-time.time()}")

@@ -1,6 +1,48 @@
 from sklearn.model_selection import train_test_split
 import numpy as np
-from constants import NUM_SLEEP_STAGES
+import pandas as pd
+
+from constants import NUM_SLEEP_STAGES, NUM_FEATURES
+
+
+def remove_nan(data):
+
+  #print(data.shape)
+  df = pd.DataFrame(np.array(list(data[:, 1]), dtype=np.float))
+  if df.isnull().values.any():
+    print(f'Data not OK, removing nan values..')
+    print()
+    nan_values = []
+    indices = list(np.arange(NUM_FEATURES))
+    for j in range(df.shape[1]):
+      nan_values.append(df[j].isnull().sum().sum())
+    
+    print(f'Before:')
+    print(f"Indices:    {indices}")      #index of feature   
+    print(f"NaN values: {nan_values}")   #number of nan values corresponding to each feature
+    print()
+
+    df = df.fillna(df.median())  #replacing nan with median
+    df2 = df.to_numpy()
+    for j in range(df2.shape[0]):
+      data[j][1] = df2[j]
+    
+
+    nan_values = []
+    indices = list(np.arange(NUM_FEATURES))
+    for j in range(df.shape[1]):
+      nan_values.append(df[j].isnull().sum().sum())
+
+    print(f'After:')
+    print(f"Indices:    {indices}")        #index of feature
+    print(f"NaN values: {nan_values}")     #number of nan values corresponding to each feature
+    print()
+
+  else:
+    print(f"Data is OK")
+  
+  return data
+
 
 #@profile
 def correntropy(x, y):
@@ -14,6 +56,7 @@ def correntropy(x, y):
     #for i in range(0, N):
         #CIP += np.average(np.exp(-0.5*(x- y[i])**2/s**2))/N
     return V
+
 
 #@profile
 def get_sums(W):
@@ -144,9 +187,20 @@ def split_datalist(data_list, clf_id):
   
   return X, Y
 
-
+#used for training and in correntropy calculation
 def preprocess(X):
   #data = (X - np.min(X, axis=0))/(np.max(X, axis=0) - np.min(X, axis=0))
   #data = X/np.max(X, axis=0)
-  data = (X - np.mean(X, axis=0))/np.std(X, axis=0)
+  m = np.mean(X, axis=0)
+  s = np.std(X, axis=0)
+  data = (X - m)/s
+  return data
+
+
+def preprocess_test(X):
+  #data = (X - np.min(X, axis=0))/(np.max(X, axis=0) - np.min(X, axis=0))
+  #data = X/np.max(X, axis=0)
+  m = np.mean(X, axis=1)[:, np.newaxis, :]
+  s = np.std(X, axis=1)[:, np.newaxis, :]
+  data = (X - m)/s
   return data
