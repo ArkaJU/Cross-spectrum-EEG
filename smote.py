@@ -12,7 +12,7 @@ n = 3500
 desired_samples = {0:n, 1:n, 2:n, 3:n, 4:n, 5:n}
 for i in range(NUM_SLEEP_STAGES):
   print(f"LABEL {i}")
-  data = np.load(f'clf{i}.npy', allow_pickle=True)
+  data = np.load(f'/content/cleaned_data/clf{i}.npy', allow_pickle=True)
   data = remove_nan(data)    #need to remove nan values if any before applying SMOTE
   X = np.array(list(data[:, 1]), dtype=np.float)
   y = np.array(data[:, 0]).astype('int')
@@ -31,4 +31,4 @@ for i in range(NUM_SLEEP_STAGES):
   data = []
   for features, label in zip(X_smote, y_smote):
     data.append((label, features))
-  np.save(f"clf_smote{i}.npy", data)
+  np.save(f"/content/cleaned_data/clf_smote{i}.npy", data)

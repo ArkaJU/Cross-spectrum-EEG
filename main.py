@@ -30,7 +30,7 @@ if train == True:
     print(f"CLF_ID:{clf_id}")
 
     #data_list = np.load(f'/content/drive/My Drive/Cross-spectrum-EEG/datasets/clf{clf_id}.npy', allow_pickle=True)
-    data_list = np.load(f'/content/clf_smote{clf_id}.npy', allow_pickle=True)
+    data_list = np.load(f'/content/cleaned_data/clf_smote{clf_id}.npy', allow_pickle=True)
     
     X_train, Y_train = split_datalist(data_list, clf_id)
     print(f"Y_train: {np.unique(Y_train, return_counts=True)}")
@@ -83,7 +83,7 @@ if train == True:
 
 if test == True: 
   #test_set = np.load('/content/drive/My Drive/Cross-spectrum-EEG/datasets/test_set.npy', allow_pickle=True)
-  test_set = np.load('/content/test_2.npy', allow_pickle=True)
+  test_set = np.load('/content/cleaned_data/test.npy', allow_pickle=True)
   test_set_dic = test_set.reshape(-1,1)[0][0]
   path = '/content/drive/My Drive/Cross-spectrum-EEG/trained_models/'
 

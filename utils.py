@@ -4,6 +4,59 @@ import pandas as pd
 
 from constants import NUM_SLEEP_STAGES, NUM_FEATURES
 
+def describe(df):
+    return pd.concat([df.mean().rename('mean'),
+                      df.median().rename('median'),
+                      df.max().rename('max'),
+                      df.min().rename('min')
+                     ], axis=1).T
+
+                     
+def out_std(s, nstd=3.0, return_thresholds=False):
+    """
+    Return a boolean mask of outliers for a series
+    using standard deviation, works column-wise.
+    param nstd:
+        Set number of standard deviations from the mean
+        to consider an outlier
+    :type nstd: ``float``
+    param return_thresholds:
+        True returns the lower and upper bounds, good for plotting.
+        False returns the masked array 
+    :type return_thresholds: ``bool``
+    """
+    data_mean, data_std = s.mean(), s.std()
+    cut_off = data_std * nstd
+    lower, upper = data_mean - cut_off, data_mean + cut_off
+    if return_thresholds:
+        return lower, upper
+    else:
+        return [True if x < lower or x > upper else False for x in s]
+
+
+def out_iqr(s, k=1.5, return_thresholds=False):
+    """
+    Return a boolean mask of outliers for a series
+    using interquartile range, works column-wise.
+    param k:
+        some cutoff to multiply by the iqr
+    :type k: ``float``
+    param return_thresholds:
+        True returns the lower and upper bounds, good for plotting.
+        False returns the masked array 
+    :type return_thresholds: ``bool``
+    """
+    # calculate interquartile range
+    q25, q75 = np.percentile(s, 25), np.percentile(s, 75)
+    iqr = q75 - q25
+    # calculate the outlier cutoff
+    cut_off = iqr * k
+    lower, upper = q25 - cut_off, q75 + cut_off
+    if return_thresholds:
+        return lower, upper
+    else: # identify outliers
+        return [True if x < lower or x > upper else False for x in s]
+
 
 def remove_nan(data):
 
