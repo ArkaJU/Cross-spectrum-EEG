@@ -12,8 +12,8 @@ n = 3500
 desired_samples = {0:n, 1:n, 2:n, 3:n, 4:n, 5:n}
 for i in range(NUM_SLEEP_STAGES):
   print(f"LABEL {i}")
-  data = np.load(f'/content/cleaned_data/clf{i}.npy', allow_pickle=True)
-  data = remove_nan(data)    #need to remove nan values if any before applying SMOTE
+  data = np.load(f'/content/original_data/clf{i}.npy', allow_pickle=True)
+  
   X = np.array(list(data[:, 1]), dtype=np.float)
   y = np.array(data[:, 0]).astype('int')
   
