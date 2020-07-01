@@ -26,7 +26,18 @@ if train == True:
 
     data_list = np.load(f'/content/cleaned_data/clf_smote{clf_id}.npy', allow_pickle=True)
     
+    #features_to_keep = [0,1,2,5,6,7,9,13,16,18,19,20,21,25,26,27,28,29,30,31]
+    features_to_keep = list(range(8))+list(range(24,32))
+    print(f"Features kept: {features_to_keep}")
+    features_to_delete = []
+    for i in range(32):
+      if i not in features_to_keep:
+        features_to_delete.append(i) 
+
     X_train, Y_train = split_datalist(data_list, clf_id)
+    print(X_train.shape)
+    #X_train = np.delete(X_train, features_to_delete, 1)     #comment if nothing to delete
+    print(X_train.shape)
     print(f"Y_train: {np.unique(Y_train, return_counts=True)}")
     X_train = preprocess(X_train)
     
@@ -36,14 +47,14 @@ if train == True:
     #clf = SGDClassifier(loss='hinge', verbose=1, class_weight=weights_dict)
     #clf = LogisticRegression(class_weight=weights_dict, max_iter=10000)
     #clf = RandomForestClassifier(class_weight=weights_dict, max_depth=100, random_state=0)
-    
+    print(X_train.shape)
     clf = SVC()
     clf.fit(X_train, Y_train)
 
     print(f"Training clf_{clf_id} complete!")
     print("Saving model..")
     
-    pickle.dump(clf, open(f'/content/drive/My Drive/Cross-spectrum-EEG/trained_models/clf_{clf_id}.sav','wb'))
+    pickle.dump(clf, open(f'clf_{clf_id}.sav','wb'))
 
     print(f"Total time taken for this sleep stage: {time.time()-t2} seconds")
     print("*****************************************************")
@@ -56,9 +67,9 @@ if train == True:
 
 if test == True: 
 
-  test_set = np.load('/content/original_data/test_set_balanced (2).npy', allow_pickle=True)
+  test_set = np.load('/content/cleaned_data/test.npy', allow_pickle=True)
   test_set_dict = test_set.reshape(-1,1)[0][0]
-  path = '/content/drive/My Drive/Cross-spectrum-EEG/trained_models/'
+  path = '/content/'
 
   #loading trained models
   clf_0 = pickle.load(open(path + 'clf_0.sav','rb'))

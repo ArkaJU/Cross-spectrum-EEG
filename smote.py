@@ -8,11 +8,11 @@ from utils import remove_nan
 warnings.filterwarnings("ignore") #suppressing warnings, don't understand what they are but could be important
 
 
-n = 3500
+n = 13000
 desired_samples = {0:n, 1:n, 2:n, 3:n, 4:n, 5:n}
 for i in range(NUM_SLEEP_STAGES):
   print(f"LABEL {i}")
-  data = np.load(f'/content/original_data/clf{i}.npy', allow_pickle=True)
+  data = np.load(f'/content/cleaned_data/clf{i}.npy', allow_pickle=True)
   
   X = np.array(list(data[:, 1]), dtype=np.float)
   y = np.array(data[:, 0]).astype('int')

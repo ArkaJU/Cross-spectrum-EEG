@@ -146,7 +146,7 @@ def treat_train_outliers(identification, treatment, details=True):
 
 
 def treat_test_outliers(identification, treatment, details=True):
-  test_set = np.load('/content/original_data/test_set_balanced (2).npy', allow_pickle=True)
+  test_set = np.load('/content/original_data/test_set_balanced.npy', allow_pickle=True)
   test_set_dic = test_set.reshape(-1,1)[0][0]
   
   for i in range(NUM_SLEEP_STAGES):
@@ -174,7 +174,7 @@ def treat_test_outliers(identification, treatment, details=True):
 
 
 if __name__ == "__main__":
-  identification = 'iqr'
-  treatment = 'replace_with_median'
+  identification = 'std'
+  treatment = 'flooring_capping'
   treat_train_outliers(identification, treatment, details=False)
   treat_test_outliers(identification, treatment, details=False)

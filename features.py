@@ -26,10 +26,10 @@ signif (array like) – Significance levels as a function of scale.
 #@profile
 def feature_gen(s1, s2):   
 
-  dt=1
+  dt = 1
   #print(f"dt={dt}")
-  W_complex, _, _, _ = wavelet.xwt(s1, s2, dt, dj=1/12)                  #TAKING TOO MUCH TIME
-  
+  W_complex, _, _, _ = wavelet.xwt(s1, s2, dt, dj=1/6)                  #TAKING TOO MUCH TIME
+  #print(W_complex.shape)
   W = np.abs(W_complex)   #row->scale, col->time
   phi = np.abs(np.angle(W_complex))                   #TAKING TOO MUCH TIME
 
@@ -50,7 +50,7 @@ def feature_gen(s1, s2):
 
   s_min, t_min = np.unravel_index(W.argmin(), W.shape)
   s_max, t_max = np.unravel_index(W.argmax(), W.shape)
-  x = np.absolute((s_max - s_min) * (t_max - t_min))  #ABSOLUTE OR NOT?
+  x = total_scales*total_time
   #print(f"s_min: {s_min}, s_max: {s_max}")
   #print(f"t_min: {t_min}, t_max: {t_max}")
   #print(f"np.absolute((s_max - s_min) * (t_max - t_min)):{x}")
@@ -59,14 +59,15 @@ def feature_gen(s1, s2):
   f4 = W_sum/(x+eps)               #adding small eps to avoid divide by zero error
   f5 = np.sqrt((np.sum((np.square(f4 - W))))/(x+eps))
 
-  f6 = s_max     #doubt
-  f7 = t_max      #doubt
-  f8 = s_min      #doubt
+  f6 = s_max     
+  f7 = t_max     
+  f8 = s_min      
+  f81 = t_min
 
-  f9 = 0.5*W_sum/(x+eps)
+  f9 = np.sum(np.multiply(W, np.arange(1,total_scales+1).reshape(-1,1) * np.ones_like(W)))/(x+eps)
   f10 = np.sum(np.square(W))
   f11 = f10/(x+eps)
-  f12 = np.sqrt(f11)
+  f12 = np.sqrt(np.sum(np.square(W))/(x+eps))
   #f13 = np.exp(min(W_sum/(x*10),700))  
   #print(f"x is{W_sum/(x*10)}")
   w = np.array(W)
@@ -92,9 +93,9 @@ def feature_gen(s1, s2):
   f22 = phi_sum/(np.max(phi))
   f23 = phi_sum/(x+eps)
   f24 = np.sqrt((np.sum(np.square((f22-phi))))/(x+eps))
-  f25 = 0.5*(phi_sum)/(x+eps)
+  f25 = np.sum(np.multiply(phi, np.arange(1,total_scales+1).reshape(-1,1) * np.ones_like(phi)))
 
-    #print(np.shape(ref_segment))
+  #print(np.shape(ref_segment))
   #print(f"shape of mean class vector: {np.shape(mean_class_vector)}")  
   # mcv = np.mean(mean_class_vector, axis=0)
   f26 = np.sqrt(np.sum(np.square(s1-s2)))     #euclidean distance between s1 and mcv ?
@@ -110,7 +111,7 @@ def feature_gen(s1, s2):
   f33 = trim_mean(corr, 0.1)
 
   #total 32 features, w/o f13
-  f = [f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f14,f15,f16,f17,f18,f19,f20,f21,f22,f23,f24,f25,f26,f27,f28,f29,f30,f31,f32,f33]
+  f = [f1,f2,f3,f4,f5, f6,f7,f8,81,f9,f10,f11, f12,f14,f15,f16,f17,f18, f19,f20,f21,f22,f23,f24,f25, f26,f27, f28,f29,f30,f31,f32, f33]
   F = []
   # for i in f:
   #   F.append(i/1e4)

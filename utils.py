@@ -110,12 +110,12 @@ def correntropy(x, y):
 def get_sums(W):
   path = '/content/matrix_masks/'
   
-  row_mask = np.load(path + 'row_mask.npy', allow_pickle=True)  #mask matrices have fixed shape for same scale and time i.shape/j.shape=(263,3750)
-  column_mask = np.load(path + 'column_mask.npy', allow_pickle=True)  #for dj=1/24 and 30 second segments
+  row_mask = np.load(path + 'row_mask_6.npy', allow_pickle=True)  #mask matrices have fixed shape for same scale and time i.shape/j.shape=(263,3750)
+  column_mask = np.load(path + 'column_mask_6.npy', allow_pickle=True) 
   
-  accum = np.multiply(W, np.multiply(row_mask, column_mask))
+  accum = np.multiply(W, np.multiply(row_mask+1, column_mask+1))
   accum = np.sum(accum)
-  accum_sq = np.multiply(W, np.multiply(row_mask**2, column_mask**2))
+  accum_sq = np.multiply(W, np.multiply((row_mask+1)**2, (column_mask+1)**2))
   accum_sq = np.sum(accum_sq)
   
   return accum, accum_sq
@@ -151,9 +151,20 @@ def split_dataset(data_dict: dict) -> [np.ndarray, list]:
   X_0, X_1, X_2, X_3, X_4, X_5 = ([] for _ in range(NUM_SLEEP_STAGES)) #initializing 6 empty strings
   X = [X_0, X_1, X_2, X_3, X_4, X_5]
   
+  #features_to_keep = [0,1,2,5,6,7,9,13,16,18,19,20,21,25,26,27,28,29,30,31]
+  features_to_keep = list(range(17))+list(range(24,32))
+  features_to_delete = []
+  for i in range(32):
+    if i not in features_to_keep:
+      features_to_delete.append(i) 
+
+  print(f"Features kept: {features_to_keep}")
+
   for i in range(NUM_SLEEP_STAGES):
-    for tup in data_dict[i]:   
-      X[i].append(tup[1]) 
+    for tup in data_dict[i]:  
+      #x = np.delete(tup[1], features_to_delete)
+      x = tup[1]       #uncomment if nothing to delete
+      X[i].append(x) 
 
   Y = []
   clf_id = np.random.randint(NUM_SLEEP_STAGES) #emphasizing that it doesn't  matter which ref label we'll use because the label of the randomly selected sample will be same for all keys in the dict

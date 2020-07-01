@@ -13,7 +13,8 @@ class DatasetBuilder:
   
   #@profile
   def __init__(self): 
-    self.ref_segments = np.load('/content/reference_segments_10.npy', allow_pickle=True).reshape(-1, 1)[0][0]
+    self.ref_segments = np.load('/content/drive/My Drive/Cross-spectrum-EEG/datasets/reference_segments_10.npy', allow_pickle=True).reshape(-1, 1)[0][0]
+    print(f"Number of ref segments: {len(self.ref_segments[0])}")
     print(f"Refs loaded in {time.time()-start} seconds")
     
   #@profile
@@ -180,7 +181,7 @@ class TrainDataset(DatasetBuilder):
         substitute_tuple = self.extract_random_segments_for_given_patient_during_warning(selected_label, patient_no)
         self.generate_features_with_ref_segments(substitute_tuple, patient_no, subs_flag=True)    #recursively call this function till Warningless segment is found (in practice Warning is rarely encountered, hence more than 1 recursive call is extremely rare)
         return    #important, else the local s1(which is the source of Warning) will continue executing, thus calling the functions in except block again and again
-      
+    #print(f"Avg vector shape: {np.mean(F_avg, axis=0).shape}")  
     self.trainset_list.append((selected_label, np.mean(F_avg, axis=0)))
     np.save(f"clf{self.ref_label}.npy", self.trainset_list)
 #************************************************************************************************************
@@ -191,7 +192,7 @@ test = False
 if train == True:
   ref_label = 0
   train_set = TrainDataset(ref_label=ref_label, num_patients=160)  
-  train_set.create(num_segs_chosen_per_patient=50)
+  train_set.create(num_segs_chosen_per_patient=200)
   np.save(f"clf{ref_label}.npy", train_set.trainset_list)
 
 
