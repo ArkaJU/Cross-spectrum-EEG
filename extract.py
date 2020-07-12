@@ -56,7 +56,7 @@ def extract_data(path, ann, onset, last_seg_duration, preprocess='std'):
   
   try:
     data = raw.get_data(picks=[name])    #taking 8th channel(EEG) instead of 3rd channel EEG(sec);  patient_no=[85,97] in the training set have these two channels swapped
-    print(name)
+    #print(name)
   except ValueError:
     print(f"Channel error at: {path}")
     data = raw.get_data(picks=['EEG']) 
