@@ -4,6 +4,7 @@ import pickle
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import SGDClassifier, LogisticRegression
+from sklearn.utils.class_weight import compute_class_weight
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from constants import *
 from utils import *
@@ -18,13 +19,13 @@ test = True
 if train == True:
   t1 = time.time()
   sleep_stages = [0,1,2,3,4,5] #clf_ids
-  param_list = [{'C':100, 'gamma':0.01, 'kernel':'rbf',    'shrinking':True},
-                {'C':10,  'gamma':0.01, 'kernel':'rbf',    'shrinking':True}, 
-                {'C':100, 'gamma':0.01, 'kernel':'rbf',    'shrinking':True},
-                {'C':100, 'gamma':0.01, 'kernel':'rbf',    'shrinking':True},
-                {'C':1,   'gamma':1,    'kernel':'linear', 'shrinking':True},
-                {'C':10,  'gamma':1,    'kernel':'linear', 'shrinking':True},]
-  for clf_id in sleep_stages:
+  # param_list = [{'C':100, 'gamma':0.01, 'kernel':'rbf',    'shrinking':True},
+  #               {'C':10,  'gamma':0.01, 'kernel':'rbf',    'shrinking':True}, 
+  #               {'C':100, 'gamma':0.01, 'kernel':'rbf',    'shrinking':True},
+  #               {'C':100, 'gamma':0.01, 'kernel':'rbf',    'shrinking':True},
+  #               {'C':1,   'gamma':1,    'kernel':'linear', 'shrinking':True},
+  #               {'C':10,  'gamma':1,    'kernel':'linear', 'shrinking':True},]
+  # for clf_id in sleep_stages:
     t2 = time.time()
     print("*****************************************************")
     print(f"CLF_ID:{clf_id}")
@@ -46,15 +47,19 @@ if train == True:
     print(f"Y_train: {np.unique(Y_train, return_counts=True)}")
     X_train = preprocess(X_train)
     
-    # print(f"Example of training feature vector: {X_train[clf_id]}")
-    # print(f"It's corresponding label: {Y_train[clf_id]}")
-    # print("*****************************************************")
-    #clf = SGDClassifier(loss='hinge', verbose=1, class_weight=weights_dict)
-    #clf = LogisticRegression(class_weight=weights_dict, max_iter=10000)
-    #clf = RandomForestClassifier(class_weight=weights_dict, max_depth=100, random_state=0)
-    params = param_list[clf_id]
-    print(params)
-    clf = SVC()
+    params = {
+          'class_weight': 'balanced',
+          'classes': [0, 1],
+          'y': list(Y_train) 
+          }
+
+    weights = compute_class_weight(**params)
+    weights_dict = {}
+    for i, w in enumerate(weights):
+      weights_dict[i] = w
+
+    print(weights_dict)
+    clf = SVC(class_weight=weights_dict)
     clf.fit(X_train, Y_train)
 
     print(f"Training clf_{clf_id} complete!")

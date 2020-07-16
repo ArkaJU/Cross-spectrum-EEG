@@ -110,8 +110,8 @@ def correntropy(x, y):
 def get_sums(W):
   path = '/content/matrix_masks/'
   
-  row_mask = np.load(path + 'row_mask_3.npy', allow_pickle=True)  #mask matrices have fixed shape for same scale and time i.shape/j.shape=(263,3750)
-  column_mask = np.load(path + 'column_mask_3.npy', allow_pickle=True) 
+  row_mask = np.load(path + 'row_mask_6.npy', allow_pickle=True)  #mask matrices have fixed shape for same scale and time i.shape/j.shape=(263,3750)
+  column_mask = np.load(path + 'column_mask_6.npy', allow_pickle=True) 
   
   accum = np.multiply(W, np.multiply(row_mask+1, column_mask+1))
   accum = np.sum(accum)
