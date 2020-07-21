@@ -29,7 +29,8 @@ class FitDictFinder:
       current_patient = patient_list[i]
       patient_ann = current_patient[:-4] + '-nsrr.xml'
       ann, onset, duration = extract_anns(TRAIN_ANN_PATH + patient_ann)
-      eeg_dict, info_dict = extract_data(TRAIN_DATA_PATH + current_patient, ann, onset, duration[-1])
+      preprocess = 'std'
+      eeg_dict, info_dict = extract_data(TRAIN_DATA_PATH + current_patient, ann, onset, duration[-1], preprocess=preprocess)
       flag = self.is_dict_fit(eeg_dict)
       print(i, flag)
       if flag: 
@@ -60,7 +61,8 @@ class ReferenceBuilder:
       ann_ref = ref[:-4] + '-nsrr.xml'
       
       ann, onset, duration = extract_anns(TRAIN_ANN_PATH + ann_ref)
-      eeg_dict, info_dict = extract_data(TRAIN_DATA_PATH + ref, ann, onset, duration[-1])
+      preprocess = 'std'
+      eeg_dict, info_dict = extract_data(TRAIN_DATA_PATH + ref, ann, onset, duration[-1], preprocess=preprocess)
       
       print(ref)
       print(ann_ref)
@@ -91,5 +93,5 @@ num_patients=10
 num_segs_chosen_per_patient_per_stage=1
 ref_builder = ReferenceBuilder(num_patients=num_patients, num_segs_chosen_per_patient_per_stage=num_segs_chosen_per_patient_per_stage)
 ref_builder.build_refs()
-np.save(f'reference_segments_{num_patients*num_segs_chosen_per_patient_per_stage}.npy', ref_builder.reference_segments)
+np.save(f'reference_segments_{num_patients*num_segs_chosen_per_patient_per_stage}_EEG_channel.npy', ref_builder.reference_segments)
 # print(f"Total time taken for reference building:{start-time.time()}")

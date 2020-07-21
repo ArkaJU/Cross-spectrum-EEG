@@ -2,7 +2,7 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import pandas as pd
 
-from constants import NUM_SLEEP_STAGES, NUM_FEATURES
+from constants import NUM_SLEEP_STAGES
 
 
 def describe(df: pd.DataFrame) -> pd.DataFrame:
@@ -65,7 +65,7 @@ def remove_nan(df: pd.DataFrame) -> pd.DataFrame:
     print(f'Data not OK, removing nan values..')
     print()
     nan_values = []
-    indices = list(np.arange(NUM_FEATURES))
+    indices = list(np.arange(df.shape[1]))
     for j in range(df.shape[1]):
       nan_values.append(df[j].isnull().sum().sum())
     
@@ -77,7 +77,7 @@ def remove_nan(df: pd.DataFrame) -> pd.DataFrame:
     df = df.fillna(df.median())  #replacing nan with median
 
     nan_values = []
-    indices = list(np.arange(NUM_FEATURES))
+    indices = list(np.arange(df.shape[1]))
     for j in range(df.shape[1]):
       nan_values.append(df[j].isnull().sum().sum())
 
@@ -152,13 +152,13 @@ def split_dataset(data_dict: dict) -> [np.ndarray, list]:
   X = [X_0, X_1, X_2, X_3, X_4, X_5]
   
   #features_to_keep = [0,1,2,5,6,7,9,13,16,18,19,20,21,25,26,27,28,29,30,31]
-  features_to_keep = list(range(17))+list(range(24,32))
-  features_to_delete = []
-  for i in range(32):
-    if i not in features_to_keep:
-      features_to_delete.append(i) 
+  # features_to_keep = list(range(17))+list(range(24,32))
+  # features_to_delete = []
+  # for i in range(32):
+  #   if i not in features_to_keep:
+  #     features_to_delete.append(i) 
 
-  print(f"Features kept: {features_to_keep}")
+  # print(f"Features kept: {features_to_keep}")
 
   for i in range(NUM_SLEEP_STAGES):
     for tup in data_dict[i]:  
@@ -181,7 +181,8 @@ def split_datalist(data_list: np.ndarray, clf_id: int) -> [np.ndarray, np.ndarra
   """
   # print(f"clf_id:{clf_id}")
 
-  X = np.array(list(data_list[:, 1]), dtype=np.float)
+  X = np.array(list(data_list[:, 1]))
+  X = np.stack([x for x in X])
   Y = np.array(data_list[:, 0]).astype('int')
 
   # print("Original labels:")

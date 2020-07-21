@@ -46,7 +46,7 @@ def extract_anns(path):
 
 #getting the EEG data for each patient->outputs labelwise dict of segments of EEG and another info dict
 #@profile
-def extract_data(path, ann, onset, last_seg_duration, preprocess='std'):
+def extract_data(path, ann, onset, last_seg_duration, preprocess):
   raw = mne.io.read_raw_edf(path, verbose=False)
   channel_names=raw.ch_names
   eeg_names='*EEG'
@@ -56,7 +56,6 @@ def extract_data(path, ann, onset, last_seg_duration, preprocess='std'):
   
   try:
     data = raw.get_data(picks=[name])    #taking 8th channel(EEG) instead of 3rd channel EEG(sec);  patient_no=[85,97] in the training set have these two channels swapped
-    #print(name)
   except ValueError:
     print(f"Channel error at: {path}")
     data = raw.get_data(picks=['EEG']) 
@@ -67,13 +66,9 @@ def extract_data(path, ann, onset, last_seg_duration, preprocess='std'):
   x = data.tolist()[0]
   
   eeg_dict = {0:[], 1:[], 2:[], 3:[], 4:[], 5:[]}
-  # for i in range(len(onset)-1):           
-  #   label = SLEEP_STAGES[ann[i]]
-  #   #print(onset[i], onset[i+1], label)
-  #   eeg_dict[label].append(x[SAMPLE_RATE * onset[i] : SAMPLE_RATE * onset[i+1]])
+
   for i in range(len(onset)-1):           
     label = SLEEP_STAGES[ann[i]]
-    #print(onset[i], onset[i+1], label)
     for j in range(onset[i], onset[i+1], DURATION_OF_EACH_SEGMENT):
       eeg_dict[label].append(x[j*SAMPLE_RATE:(j+DURATION_OF_EACH_SEGMENT)*SAMPLE_RATE])
   
@@ -82,13 +77,19 @@ def extract_data(path, ann, onset, last_seg_duration, preprocess='std'):
   try:
     last_label = SLEEP_STAGES[ann[-1]]
     for j in range(onset[-1], onset[-1]+int(last_seg_duration), DURATION_OF_EACH_SEGMENT):
-        eeg_dict[last_label].append(x[j*SAMPLE_RATE : (j+DURATION_OF_EACH_SEGMENT)*SAMPLE_RATE])
+      eeg_dict[last_label].append(x[j*SAMPLE_RATE : (j+DURATION_OF_EACH_SEGMENT)*SAMPLE_RATE])
   except KeyError:
-    print("KeyError")
+    print(f"KeyError: {last_label}")
     pass
     
   info_dict = {}
   for i in range(NUM_SLEEP_STAGES):
     info_dict[SLEEP_STAGES_INV[i]] = len(eeg_dict[i])    #info regarding how many segments of each type in each patient's EEG
 
-  return eeg_dict, info_dict
+  return_stats = False
+  
+  if return_stats:
+    stats = [np.max(data), np.min(data), np.mean(data), np.std(data)]
+    return eeg_dict, info_dict, np.array(stats)  
+  else:
+    return eeg_dict, info_dict

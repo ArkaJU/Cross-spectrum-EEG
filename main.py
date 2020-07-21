@@ -25,7 +25,7 @@ if train == True:
   #               {'C':100, 'gamma':0.01, 'kernel':'rbf',    'shrinking':True},
   #               {'C':1,   'gamma':1,    'kernel':'linear', 'shrinking':True},
   #               {'C':10,  'gamma':1,    'kernel':'linear', 'shrinking':True},]
-  # for clf_id in sleep_stages:
+  for clf_id in sleep_stages:
     t2 = time.time()
     print("*****************************************************")
     print(f"CLF_ID:{clf_id}")
@@ -78,7 +78,7 @@ if train == True:
 
 if test == True: 
 
-  test_set = np.load('/content/original_data/test_set_balanced.npy', allow_pickle=True)
+  test_set = np.load('/content/drive/My Drive/test_set_balanced.npy', allow_pickle=True)
   test_set_dict = test_set.reshape(-1,1)[0][0]
   path = '/content/'
 
@@ -109,28 +109,16 @@ if test == True:
 
   #loop over the sample axis
   for i in range(distances_from_hyperplane.shape[1]):
-    # print(i, distances_from_hyperplane[:, i])  #distances of a particular sample from hyperplanes of corresponding classifiers-> (6, )
-    # print(f"Actual label: {Y_test[i]}")
-    # print(f"Distance1: {np.argmax(distances_from_hyperplane[:, i])}->{np.max(distances_from_hyperplane[:, i])}")
-    # print(f"Distance2: {np.argsort(distances_from_hyperplane[:, i])[-2]}->{np.sort(distances_from_hyperplane[:, i])[-2]}")
-    # print()
     Y_preds.append(np.argmax(distances_from_hyperplane[:, i]))    #prediction is the label corresponding to which highest distance is obtained
-    # Y_preds2.append(np.argsort(distances_from_hyperplane[:, i])[-2])    #prediction is the label corresponding to which 2nd highest distance is obtained
-
 
   print(f"Y_preds: {Y_preds}")
-  # np.save('Y_test.npy', Y_test)
-  # np.save('preds.npy', Y_preds)
-  # np.save('preds2.npy', Y_preds2)
   print("#####################################################")
   print(f"Y_test: {Y_test}")
   print(f"Accuracy: {accuracy_score(Y_test, Y_preds)}")
   print(f"Confusion matrix: \n{confusion_matrix(Y_test, Y_preds)}")
   print(f"Classification Report:\n {classification_report(Y_test, Y_preds)}")
   print()
-  # print(f"Accuracy: {accuracy_score(Y_test, Y_preds2)}")
-  # print(f"Confusion matrix: \n{confusion_matrix(Y_test, Y_preds2)}")
-  # print(f"Classification Report:\n {classification_report(Y_test, Y_preds2)}")
+
   print("*****************************************************************************")
 
 print(f"The whole process took {time.time()-start} seconds")
