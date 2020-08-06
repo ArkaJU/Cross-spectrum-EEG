@@ -2,7 +2,7 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import pandas as pd
 
-from constants import NUM_SLEEP_STAGES, NUM_FEATURES
+from constants import NUM_SLEEP_STAGES
 
 
 def describe(df: pd.DataFrame) -> pd.DataFrame:
@@ -65,7 +65,7 @@ def remove_nan(df: pd.DataFrame) -> pd.DataFrame:
     print(f'Data not OK, removing nan values..')
     print()
     nan_values = []
-    indices = list(np.arange(NUM_FEATURES))
+    indices = list(np.arange(df.shape[1]))
     for j in range(df.shape[1]):
       nan_values.append(df[j].isnull().sum().sum())
     
@@ -77,7 +77,7 @@ def remove_nan(df: pd.DataFrame) -> pd.DataFrame:
     df = df.fillna(df.median())  #replacing nan with median
 
     nan_values = []
-    indices = list(np.arange(NUM_FEATURES))
+    indices = list(np.arange(df.shape[1]))
     for j in range(df.shape[1]):
       nan_values.append(df[j].isnull().sum().sum())
 
@@ -93,10 +93,10 @@ def remove_nan(df: pd.DataFrame) -> pd.DataFrame:
 
 
 #@profile
-def correntropy(x, y):
+def correntropy(x, y, preprocessing='standardize'):
     #N = len(x)
-    X = preprocess(x)
-    Y = preprocess(y)
+    X = preprocess(x, preprocessing)
+    Y = preprocess(y, preprocessing)
     s = np.std(X, axis=0)
     #print(f"std dev: {s}")
     V = np.exp(-0.5*np.square(X - Y)/s**2)
@@ -108,10 +108,10 @@ def correntropy(x, y):
 
 #@profile
 def get_sums(W):
-  path = '/content/matrix_masks/'
+  path = '/content/Cross-spectrum-EEG_2/datasets/matrix_masks/'
   
-  row_mask = np.load(path + 'row_mask_6.npy', allow_pickle=True)  #mask matrices have fixed shape for same scale and time i.shape/j.shape=(263,3750)
-  column_mask = np.load(path + 'column_mask_6.npy', allow_pickle=True) 
+  row_mask = np.load(path + 'row_mask_12.npy', allow_pickle=True)  #mask matrices have fixed shape for same scale and time i.shape/j.shape=(263,3750)
+  column_mask = np.load(path + 'column_mask_12.npy', allow_pickle=True) 
   
   accum = np.multiply(W, np.multiply(row_mask+1, column_mask+1))
   accum = np.sum(accum)
@@ -152,17 +152,17 @@ def split_dataset(data_dict: dict) -> [np.ndarray, list]:
   X = [X_0, X_1, X_2, X_3, X_4, X_5]
   
   #features_to_keep = [0,1,2,5,6,7,9,13,16,18,19,20,21,25,26,27,28,29,30,31]
-  features_to_keep = list(range(17))+list(range(24,32))
-  features_to_delete = []
-  for i in range(32):
-    if i not in features_to_keep:
-      features_to_delete.append(i) 
+  # features_to_keep = list(range(17))+list(range(24,32))
+  # features_to_delete = []
+  # for i in range(32):
+  #   if i not in features_to_keep:
+  #     features_to_delete.append(i) 
 
-  print(f"Features kept: {features_to_keep}")
+  # print(f"Features kept: {features_to_keep}")
 
   for i in range(NUM_SLEEP_STAGES):
     for tup in data_dict[i]:  
-      #x = np.delete(tup[1], features_to_delete)
+      #x = np.delete(tup[1], 8)
       x = tup[1]       #uncomment if nothing to delete
       X[i].append(x) 
 
@@ -174,48 +174,64 @@ def split_dataset(data_dict: dict) -> [np.ndarray, list]:
   return np.array(X), Y         #(num_sleep_stages, total_samples, num_features), num_samples
 
 
-def split_datalist(data_list: np.ndarray, clf_id: int) -> [np.ndarray, np.ndarray]:    
+def split_datalist(data_list1: np.ndarray, clf_id1: int, data_list2: np.ndarray, clf_id2: int) -> [np.ndarray, np.ndarray]:    
   """
   data_list -> list of (selected_seg_label, avg feature_vector of ref_label: selected_seg X ref_seg)
   clf_id -> signifies which SVM this data is meant for
   """
   # print(f"clf_id:{clf_id}")
 
-  X = np.array(list(data_list[:, 1]), dtype=np.float)
-  Y = np.array(data_list[:, 0]).astype('int')
+  X1 = np.array(list(data_list1[:, 1]))
+  X1 = np.stack([x for x in X1])
+  Y1 = np.array(data_list1[:, 0]).astype('int')
 
-  # print("Original labels:")
-  # print(Y)
+  X2 = np.array(list(data_list2[:, 1]))
+  X2 = np.stack([x for x in X2])
+  Y2 = np.array(data_list2[:, 0]).astype('int')
 
-  pos_indices = np.where(Y == clf_id)[0]
-  Y[np.where(Y != clf_id)[0].tolist()] = -1
-  Y[np.where(Y == clf_id)[0].tolist()] = 1
-  Y[np.where(Y == -1)[0].tolist()] = 0
+  X = np.concatenate((X1,X2), axis=1)
+  assert np.all(Y1==Y2) 
+  Y = Y1    #can be Y2 as well
 
-  assert np.all(np.where(Y == 1)[0] == pos_indices)
+  pos_indices0 = np.where((Y != clf_id1) & (Y != clf_id2))[0]
+  pos_indices1 = np.where(Y == clf_id1)[0]
+  pos_indices2 = np.where(Y == clf_id2)[0]
 
-  # print("Binarized labels:")
-  # print(Y)
-  # print(X.shape)
-  # print(Y.shape)
+  Y[np.where((Y != clf_id1) & (Y != clf_id2))[0].tolist()] = -1 #none
+
+  assert np.all(np.where(Y == -1)[0] == pos_indices0)
+  assert np.all(np.where(Y == clf_id1)[0] == pos_indices1)
+  assert np.all(np.where(Y == clf_id2)[0] == pos_indices2)
   
   return X, Y                #(total_samples, num_featues), (total_samples,) 
 
 
 #used for training and in correntropy calculation
-def preprocess(X: np.ndarray) -> np.ndarray:
-  #data = (X - np.min(X, axis=0))/(np.max(X, axis=0) - np.min(X, axis=0))
-  m = np.mean(X, axis=0)
-  s = np.std(X, axis=0)
+def preprocess(X: np.ndarray, preprocessing: str) -> np.ndarray:
 
-  data = (X - m)/s
+  if preprocessing=="standardize":
+    m = np.mean(X, axis=0)
+    s = np.std(X, axis=0)
+    data = (X - m)/s
+  
+  if preprocessing=="normalize":
+    mx = np.max(X, axis=0)
+    mn = np.min(X, axis=0)
+    data = (X - mn)/(mx - mn)
+
   return data               #(total_samples, num_featues)
 
 
-def preprocess_test(X: np.ndarray) -> np.ndarray:
-  #data = (X - np.min(X, axis=0))/(np.max(X, axis=0) - np.min(X, axis=0))
-  m = np.mean(X, axis=1)[:, np.newaxis, :]
-  s = np.std(X, axis=1)[:, np.newaxis, :]
+def preprocess_test(X: np.ndarray, preprocessing: str) -> np.ndarray:
   
-  data = (X - m)/s
+  if preprocessing=="standardize":
+    m = np.mean(X, axis=1)[:, np.newaxis, :]
+    s = np.std(X, axis=1)[:, np.newaxis, :]
+    data = (X - m)/s
+  
+  if preprocessing=="normalize":
+    mx = np.max(X, axis=1)[:, np.newaxis, :]
+    mn = np.min(X, axis=1)[:, np.newaxis, :]
+    data = (X - mn)/(mx - mn)
+
   return data                   #(num_sleep_stages, total_samples, num_features)

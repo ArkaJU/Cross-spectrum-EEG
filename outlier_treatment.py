@@ -2,17 +2,17 @@ import numpy as np
 import pandas as pd
 from IPython.display import display
 from utils import out_std, out_iqr, describe
-from constants import NUM_SLEEP_STAGES, NUM_FEATURES
+from constants import NUM_SLEEP_STAGES
 
 def trimming(df, y, get_cutoffs, details):
   indices_to_be_removed = []
   if details: 
     print(f"Skew Before")
-    for i in range(NUM_FEATURES):
+    for i in range(df.shape[1]):
       print(f"{i}: {df[i].skew()}")
       print("#####################")
       print()
-  for i in range(NUM_FEATURES):
+  for i in range(df.shape[1]):
     lower, upper = get_cutoffs(df[i], return_thresholds=True)
     indices_to_be_removed += [j for j in range(df.shape[0]) if df[i][j]>upper or df[i][j]<lower]
   
@@ -23,7 +23,7 @@ def trimming(df, y, get_cutoffs, details):
   y = np.delete(y, indices_to_be_removed, axis=0)
   if details: 
     print(f"Skew After")
-    for i in range(NUM_FEATURES):
+    for i in range(df.shape[1]):
       print(f"{i}: {df[i].skew()}")
       print("#####################")
       print()
@@ -31,7 +31,7 @@ def trimming(df, y, get_cutoffs, details):
 
 
 def flooring_capping(df, get_cutoffs, details):
-  for i in range(NUM_FEATURES):
+  for i in range(df.shape[1]):
     if details: print(f"Skew before: {df[i].skew()}")
     lower, upper = get_cutoffs(df[i], return_thresholds=True)
     df[i] = np.where(df[i]<lower, lower, df[i])
@@ -46,7 +46,7 @@ def flooring_capping(df, get_cutoffs, details):
 
 def replace_with_median(df, get_cutoffs, details):
 
-  for i in range(NUM_FEATURES):
+  for i in range(df.shape[1]):
     if details: print(f"{i}:")
     if details: print(f"Skew before: {df[i].skew()}")
 
@@ -68,7 +68,7 @@ def remove_nan(df: pd.DataFrame) -> pd.DataFrame:
     print(f'Data not OK, removing nan values..')
     print()
     nan_values = []
-    indices = list(np.arange(NUM_FEATURES))
+    indices = list(np.arange(df.shape[1]))
     for j in range(df.shape[1]):
       nan_values.append(df[j].isnull().sum().sum())
     
@@ -80,7 +80,7 @@ def remove_nan(df: pd.DataFrame) -> pd.DataFrame:
     df = df.fillna(df.median())  #replacing nan with median
 
     nan_values = []
-    indices = list(np.arange(NUM_FEATURES))
+    indices = list(np.arange(df.shape[1]))
     for j in range(df.shape[1]):
       nan_values.append(df[j].isnull().sum().sum())
 
@@ -123,7 +123,8 @@ def treat_train_outliers(identification, treatment, details=True):
 
   for label in range(NUM_SLEEP_STAGES):
     data = np.load(f'/content/original_data/clf{label}.npy', allow_pickle=True)
-    X = np.array(list(data[:, 1]), dtype=np.float)
+    X = np.array(list(data[:, 1]))
+    X = np.stack([x for x in X])
     y = np.array(data[:, 0]).astype('int')
     df = pd.DataFrame(data=X)
     if details: print(f"Label: {label}:")
