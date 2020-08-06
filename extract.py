@@ -74,11 +74,13 @@ def extract_data(path, ann, onset, last_seg_duration, preprocess):
   
   #TAKING CARE OF THE LAST SEGMENT 
   #try-except for the weird 'Unscored-9' stage in some patients
+  
   try:
     last_label = SLEEP_STAGES[ann[-1]]
     for j in range(onset[-1], onset[-1]+int(last_seg_duration), DURATION_OF_EACH_SEGMENT):
       eeg_dict[last_label].append(x[j*SAMPLE_RATE : (j+DURATION_OF_EACH_SEGMENT)*SAMPLE_RATE])
   except KeyError:
+    last_label = ann[-1]
     print(f"KeyError: {last_label}")
     pass
     

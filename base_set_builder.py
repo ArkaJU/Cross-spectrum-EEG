@@ -30,8 +30,8 @@ class Dataset():
     eeg_dict, info_dict = extract_data(self.data_path + current_patient, ann, onset, duration[-1], preprocess=preprocess)
     len_dict = {}
     
-    # for i in eeg_dict.keys(): 
-    #   len_dict[i] = len(eeg_dict[i])
+    for i in eeg_dict.keys(): 
+      len_dict[i] = len(eeg_dict[i])
 
     tuples = []    #all (label, segment)
     for label in eeg_dict.keys():
@@ -72,6 +72,6 @@ class Dataset():
 
 data_set = Dataset(num_patients=NUM_CHOSEN_PATIENTS)  
 data_set.create(num_segs_chosen_per_patient=NUM_SEG_CHOSEN_PER_PATIENT)
-np.save(f"/content/drive/My Drive/data_set.npy", data_set.data_list)
+np.save(f"/content/drive/My Drive/data_set2.npy", data_set.data_list)
 
 print(f"Total time: {time.time()-start} seconds")

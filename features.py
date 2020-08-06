@@ -24,7 +24,12 @@ signif (array like) – Significance levels as a function of scale.
 '''
 
 #@profile
-def feature_gen(s1, s2, M, S):   
+#def feature_gen(s1, s2, Mean, Std, Max, encoder):   
+def feature_gen(s1, s2, Mean, Std):   
+
+  # x_test=s1/Max
+  # x_test = np.reshape(x_test, (len(x_test), -1))
+  # encoded_segs = encoder.predict(x_test.T)
 
   #time domain features
   f_t1 = np.max(s1)
@@ -42,9 +47,9 @@ def feature_gen(s1, s2, M, S):
   f_t12 = np.where(np.diff(np.sign( [i for i in s1 if i] )))[0].shape[0] #zero crossings
   f_t13 = np.where(np.diff(np.sign( [i for i in np.gradient(s1) if i] )))[0].shape[0] #slope sign change
 
-  s1 = (s1-M)/S  #pre-processing now
+  s1 = (s1-Mean)/Std  #pre-processing now
   dt = 1
-  W_complex, _, _, _ = wavelet.xwt(s1, s2, dt, dj=1/6)                  
+  W_complex, _, _, _ = wavelet.xwt(s1, s2, dt, dj=1/12)                  
   W = np.abs(W_complex)   #row->scale, col->time
   phi = np.abs(np.angle(W_complex))                   
 
@@ -117,4 +122,9 @@ def feature_gen(s1, s2, M, S):
   f = [f_t1,f_t2,f_t3,f_t4,f_t5,f_t6,f_t7,f_t8,f_t9,f_t10,f_t11,f_t12,f_t13,
        f1,f2,f3,f4,f5, f6,f7,f8,f81,f9,f10,f11, f12,f14,f15,f16,f17,f18, f19,f20,f21,f22,f23,f24,f25, f26,f27, f28,f29,f30,f31,f32, f33]
 
+  # autoencoder_features = encoded_segs.tolist()
+  # #print(autoencoder_features)
+  # for enc_feature in autoencoder_features[0]:
+  #   f.append(enc_feature)
+    
   return np.array(f)

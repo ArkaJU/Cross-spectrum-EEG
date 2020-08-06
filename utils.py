@@ -93,10 +93,10 @@ def remove_nan(df: pd.DataFrame) -> pd.DataFrame:
 
 
 #@profile
-def correntropy(x, y):
+def correntropy(x, y, preprocessing='standardize'):
     #N = len(x)
-    X = preprocess(x)
-    Y = preprocess(y)
+    X = preprocess(x, preprocessing)
+    Y = preprocess(y, preprocessing)
     s = np.std(X, axis=0)
     #print(f"std dev: {s}")
     V = np.exp(-0.5*np.square(X - Y)/s**2)
@@ -108,10 +108,10 @@ def correntropy(x, y):
 
 #@profile
 def get_sums(W):
-  path = '/content/matrix_masks/'
+  path = '/content/Cross-spectrum-EEG_2/datasets/matrix_masks/'
   
-  row_mask = np.load(path + 'row_mask_6.npy', allow_pickle=True)  #mask matrices have fixed shape for same scale and time i.shape/j.shape=(263,3750)
-  column_mask = np.load(path + 'column_mask_6.npy', allow_pickle=True) 
+  row_mask = np.load(path + 'row_mask_12.npy', allow_pickle=True)  #mask matrices have fixed shape for same scale and time i.shape/j.shape=(263,3750)
+  column_mask = np.load(path + 'column_mask_12.npy', allow_pickle=True) 
   
   accum = np.multiply(W, np.multiply(row_mask+1, column_mask+1))
   accum = np.sum(accum)
@@ -204,19 +204,31 @@ def split_datalist(data_list: np.ndarray, clf_id: int) -> [np.ndarray, np.ndarra
 
 
 #used for training and in correntropy calculation
-def preprocess(X: np.ndarray) -> np.ndarray:
-  #data = (X - np.min(X, axis=0))/(np.max(X, axis=0) - np.min(X, axis=0))
-  m = np.mean(X, axis=0)
-  s = np.std(X, axis=0)
+def preprocess(X: np.ndarray, preprocessing: str) -> np.ndarray:
 
-  data = (X - m)/s
+  if preprocessing=="standardize":
+    m = np.mean(X, axis=0)
+    s = np.std(X, axis=0)
+    data = (X - m)/s
+  
+  if preprocessing=="normalize":
+    mx = np.max(X, axis=0)
+    mn = np.min(X, axis=0)
+    data = (X - mn)/(mx - mn)
+
   return data               #(total_samples, num_featues)
 
 
-def preprocess_test(X: np.ndarray) -> np.ndarray:
-  #data = (X - np.min(X, axis=0))/(np.max(X, axis=0) - np.min(X, axis=0))
-  m = np.mean(X, axis=1)[:, np.newaxis, :]
-  s = np.std(X, axis=1)[:, np.newaxis, :]
+def preprocess_test(X: np.ndarray, preprocessing: str) -> np.ndarray:
   
-  data = (X - m)/s
+  if preprocessing=="standardize":
+    m = np.mean(X, axis=1)[:, np.newaxis, :]
+    s = np.std(X, axis=1)[:, np.newaxis, :]
+    data = (X - m)/s
+  
+  if preprocessing=="normalize":
+    mx = np.max(X, axis=1)[:, np.newaxis, :]
+    mn = np.min(X, axis=1)[:, np.newaxis, :]
+    data = (X - mn)/(mx - mn)
+
   return data                   #(num_sleep_stages, total_samples, num_features)

@@ -14,7 +14,8 @@ start = time.time()
 
 train = True
 test = True
-
+#preprocessing = 'standardize'
+preprocessing = 'normalize'
 
 if train == True:
   t1 = time.time()
@@ -25,12 +26,13 @@ if train == True:
   #               {'C':100, 'gamma':0.01, 'kernel':'rbf',    'shrinking':True},
   #               {'C':1,   'gamma':1,    'kernel':'linear', 'shrinking':True},
   #               {'C':10,  'gamma':1,    'kernel':'linear', 'shrinking':True},]
+  print("Training model....")
   for clf_id in sleep_stages:
     t2 = time.time()
     print("*****************************************************")
     print(f"CLF_ID:{clf_id}")
 
-    data_list = np.load(f'/content/cleaned_data/clf_smote{clf_id}.npy', allow_pickle=True)
+    data_list = np.load(f'/content/cleaned_data/clf{clf_id}.npy', allow_pickle=True)
     
     #features_to_keep = [0,1,2,5,6,7,9,13,16,18,19,20,21,25,26,27,28,29,30,31]
     #features_to_keep = list(range(8))+list(range(24,32))
@@ -45,7 +47,8 @@ if train == True:
     #X_train = np.delete(X_train, 8, 1)     #comment if nothing to delete
     print(X_train.shape)
     print(f"Y_train: {np.unique(Y_train, return_counts=True)}")
-    X_train = preprocess(X_train)
+    print(f"preprocessing: {preprocessing}")
+    X_train = preprocess(X_train, preprocessing)
     
     params = {
           'class_weight': 'balanced',
@@ -65,7 +68,8 @@ if train == True:
     print(f"Training clf_{clf_id} complete!")
     print("Saving model..")
     
-    pickle.dump(clf, open(f'clf_{clf_id}.sav','wb'))
+    pickle.dump(clf, open(f'/content/clf_{clf_id}.sav','wb'))
+    #pickle.dump(clf, open(f'/content/drive/My Drive/Cross-spectrum-EEG_2/trained_models/clf_{clf_id}.sav','wb'))
 
     print(f"Total time taken for this sleep stage: {time.time()-t2} seconds")
     print("*****************************************************")
@@ -81,6 +85,7 @@ if test == True:
   test_set = np.load('/content/drive/My Drive/test_set_balanced.npy', allow_pickle=True)
   test_set_dict = test_set.reshape(-1,1)[0][0]
   path = '/content/'
+  #path = '/content/drive/My Drive/Cross-spectrum-EEG_2/trained_models/'
 
   #loading trained models
   clf_0 = pickle.load(open(path + 'clf_0.sav','rb'))
@@ -93,7 +98,7 @@ if test == True:
   CLF = [clf_0, clf_1, clf_2, clf_3, clf_4, clf_5]    # list of classifiers
 
   X_test, Y_test = split_dataset(test_set_dict)
-  X_test = preprocess_test(X_test)
+  X_test = preprocess_test(X_test, preprocessing)
   print(f"X_test.shape :{X_test.shape}")        
  
   distances_from_hyperplane = []
