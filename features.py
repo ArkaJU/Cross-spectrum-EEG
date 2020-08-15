@@ -49,7 +49,7 @@ def feature_gen(s1, s2, Mean, Std):
 
   s1 = (s1-Mean)/Std  #pre-processing now
   dt = 1
-  W_complex, _, _, _ = wavelet.xwt(s1, s2, dt, dj=1/12)                  
+  W_complex, _, _, _ = wavelet.xwt(s1, s2, dt, dj=1/6)                  
   W = np.abs(W_complex)   #row->scale, col->time
   phi = np.abs(np.angle(W_complex))                   
 

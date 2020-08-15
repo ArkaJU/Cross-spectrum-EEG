@@ -67,11 +67,14 @@ def extract_data(path, ann, onset, last_seg_duration, preprocess):
   
   eeg_dict = {0:[], 1:[], 2:[], 3:[], 4:[], 5:[]}
 
-  for i in range(len(onset)-1):           
-    label = SLEEP_STAGES[ann[i]]
-    for j in range(onset[i], onset[i+1], DURATION_OF_EACH_SEGMENT):
-      eeg_dict[label].append(x[j*SAMPLE_RATE:(j+DURATION_OF_EACH_SEGMENT)*SAMPLE_RATE])
-  
+  for i in range(len(onset)-1): 
+    try:          
+      label = SLEEP_STAGES[ann[i]]
+      for j in range(onset[i], onset[i+1], DURATION_OF_EACH_SEGMENT):
+        eeg_dict[label].append(x[j*SAMPLE_RATE:(j+DURATION_OF_EACH_SEGMENT)*SAMPLE_RATE])
+    except KeyError:
+      print(f"KeyError: {ann[i]}")
+      pass
   #TAKING CARE OF THE LAST SEGMENT 
   #try-except for the weird 'Unscored-9' stage in some patients
   
@@ -88,7 +91,7 @@ def extract_data(path, ann, onset, last_seg_duration, preprocess):
   for i in range(NUM_SLEEP_STAGES):
     info_dict[SLEEP_STAGES_INV[i]] = len(eeg_dict[i])    #info regarding how many segments of each type in each patient's EEG
 
-  return_stats = False
+  return_stats = True
   
   if return_stats:
     stats = [np.max(data), np.min(data), np.mean(data), np.std(data)]

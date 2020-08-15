@@ -2,7 +2,7 @@ import os
 import time
 import random
 import numpy as np
-from keras.models import load_model
+#from keras.models import load_model
 
 from features import feature_gen
 from constants import NUM_SEG_CHOSEN_PER_PATIENT, NUM_CHOSEN_PATIENTS
@@ -14,8 +14,8 @@ class TrainSetBuilder:
   #@profile
   def __init__(self, ref_label): 
 
-    self.base_dataset = np.load('/content/drive/My Drive/data_set2.npy', allow_pickle=True)
-    self.ref_segments = np.load('/content/Cross-spectrum-EEG_2/datasets/ref-EEG/reference_segments_10_EEG_channel.npy', allow_pickle=True).reshape(-1, 1)[0][0]
+    self.base_dataset = np.load('/content/drive/My Drive/data_set3.npy', allow_pickle=True)
+    self.ref_segments = np.load('/content/Cross-spectrum-EEG/datasets/ref-EEG/reference_segments_5_EEG_channel.npy', allow_pickle=True).reshape(-1, 1)[0][0]
     print(f"Number of references: {len(self.ref_segments[0])}")
     print(f"Base dataset and references loaded in {time.time()-start} seconds")
     
@@ -47,12 +47,12 @@ class TrainSetBuilder:
 
     #print(np.mean(F_avg, axis=0).shape)
     self.trainset_list.append((selected_label, np.mean(F_avg, axis=0)))
-    np.save(f"/content/clf{self.ref_label}_2.npy", self.trainset_list)
+    np.save(f"/content/drive/My Drive/clf{self.ref_label}_4.npy", self.trainset_list)
 
 
   #@profile
   def create(self):      #main
-    stats = np.load('/content/drive/My Drive/Cross-spectrum-EEG_2/datasets/stats/stats.npy', allow_pickle=True)
+    stats = np.load('/content/Cross-spectrum-EEG/datasets/stats/stats2.npy', allow_pickle=True)
     maxm = stats[0, 0]
     mean = stats[0, 2]
     std =  stats[0, 3]
@@ -68,12 +68,11 @@ class TrainSetBuilder:
         std =  stats[p, 3]
         print(f"{i+1}: Time taken so far is {time.time()-start} seconds")
 
-      if (i+1)%10==0:
-        print(f"{i+1}: Time taken so far is {time.time()-start} seconds")
+    print(f"{i+1}: Time taken so far is {time.time()-start} seconds")
 #************************************************************************************************************
 
 
 ref_label = 1
 train_set = TrainSetBuilder(ref_label=ref_label)  
 train_set.create()
-np.save(f"/content/clf{ref_label}_2.npy", train_set.trainset_list)
+np.save(f"/content/drive/My Drive/clf{ref_label}_4.npy", train_set.trainset_list)

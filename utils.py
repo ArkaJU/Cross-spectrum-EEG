@@ -108,10 +108,10 @@ def correntropy(x, y, preprocessing='standardize'):
 
 #@profile
 def get_sums(W):
-  path = '/content/Cross-spectrum-EEG_2/datasets/matrix_masks/'
+  path = '/content/Cross-spectrum-EEG/datasets/matrix_masks/'
   
-  row_mask = np.load(path + 'row_mask_12.npy', allow_pickle=True)  #mask matrices have fixed shape for same scale and time i.shape/j.shape=(263,3750)
-  column_mask = np.load(path + 'column_mask_12.npy', allow_pickle=True) 
+  row_mask = np.load(path + 'row_mask_6.npy', allow_pickle=True)  #mask matrices have fixed shape for same scale and time i.shape/j.shape=(263,3750)
+  column_mask = np.load(path + 'column_mask_6.npy', allow_pickle=True) 
   
   accum = np.multiply(W, np.multiply(row_mask+1, column_mask+1))
   accum = np.sum(accum)
@@ -207,6 +207,7 @@ def split_datalist(data_list1: np.ndarray, clf_id1: int, data_list2: np.ndarray,
 
 
 #used for training and in correntropy calculation
+#@profile
 def preprocess(X: np.ndarray, preprocessing: str) -> np.ndarray:
 
   if preprocessing=="standardize":

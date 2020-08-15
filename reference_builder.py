@@ -89,9 +89,9 @@ class ReferenceBuilder:
 start = time.time()
 # fdf = FitDictFinder(min_seg_per_stage_reqd=1)
 # fdf.get_fit_dict_indices()
-num_patients=10
+num_patients=5
 num_segs_chosen_per_patient_per_stage=1
 ref_builder = ReferenceBuilder(num_patients=num_patients, num_segs_chosen_per_patient_per_stage=num_segs_chosen_per_patient_per_stage)
 ref_builder.build_refs()
-np.save(f'reference_segments_{num_patients*num_segs_chosen_per_patient_per_stage}_EEG_channel.npy', ref_builder.reference_segments)
+np.save(f'/content/drive/My Drive/Cross-spectrum-EEG/datasets/ref-EEG/reference_segments_{num_patients*num_segs_chosen_per_patient_per_stage}_EEG_channel.npy', ref_builder.reference_segments)
 # print(f"Total time taken for reference building:{start-time.time()}")

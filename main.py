@@ -24,7 +24,9 @@ if train == True:
   sleep_stages = [0,1,2,3,4,5] #clf_ids
 
   print("Training model....")
-  combos = list(combinations(list(range(NUM_SLEEP_STAGES)), 2))
+  i = 0
+  combos = list(combinations(list(range(6)), 2))[i*3:(i+1)*3]
+  #combos = list(combinations(list(range(6)), 2))
 
   for idx, (clf_id1, clf_id2) in enumerate(combos):
 
@@ -32,8 +34,8 @@ if train == True:
     print("*****************************************************")
     print(f"{idx}. CLF_ID1: {clf_id1}, CLF_ID2: {clf_id2}")
 
-    data_list1 = np.load(f'/content/cleaned_data/clf{clf_id1}.npy', allow_pickle=True)
-    data_list2 = np.load(f'/content/cleaned_data/clf{clf_id2}.npy', allow_pickle=True)
+    data_list1 = np.load(f'/content/cleaned_data/clf_smote{clf_id1}.npy', allow_pickle=True)
+    data_list2 = np.load(f'/content/cleaned_data/clf_smote{clf_id2}.npy', allow_pickle=True)
 
     X_train, Y_train = split_datalist(data_list1, clf_id1, data_list2, clf_id2)
     print(X_train.shape)
@@ -60,8 +62,8 @@ if train == True:
     print(f"Training clf_{clf_id1}{clf_id2} complete!")
     print("Saving model..")
     
-    pickle.dump(clf, open(f'/content//content/drive/My Drive/Cross-spectrum-EEG/trained_models/clf_{clf_id1}{clf_id2}.sav','wb'))
-    #pickle.dump(clf, open(f'/content/drive/My Drive/Cross-spectrum-EEG_2/trained_models/clf_{clf_id}.sav','wb'))
+    pickle.dump(clf, open(f'/content/drive/My Drive/Cross-spectrum-EEG/trained_models/clf_{clf_id1}{clf_id2}.sav','wb'))
+    #pickle.dump(clf, open(f'/content/clf_{clf_id1}{clf_id2}.sav','wb'))
 
     print(f"Total time taken for this sleep stage: {time.time()-t2} seconds")
     print("*****************************************************")
@@ -74,8 +76,6 @@ if train == True:
 
 if test == True: 
 
-  test_set = np.load('/content/drive/My Drive/test_set_balanced.npy', allow_pickle=True)
-  test_set_dict = test_set.reshape(-1,1)[0][0]
   #path = '/content/'
   path = '/content/drive/My Drive/Cross-spectrum-EEG/trained_models/'
 
@@ -100,11 +100,11 @@ if test == True:
         clf_14, clf_15, clf_23, clf_24, clf_25, clf_34, clf_35, clf_45]    # list of classifiers
 
 
-  test_set = np.load('/content/drive/My Drive/test_set_balanced.npy', allow_pickle=True)
+  test_set = np.load('/content/drive/My Drive/test_set_balanced_5_refs.npy', allow_pickle=True)
   test_set_dict = test_set.reshape(-1,1)[0][0]
   X_test, Y_test = split_dataset(test_set_dict)
   X_test = preprocess_test(X_test, preprocessing)
-
+  print(X_test.shape)
   preds = []
   Y_preds = []
   combos = list(combinations(list(range(NUM_SLEEP_STAGES)), 2))
@@ -118,9 +118,16 @@ if test == True:
 
   preds = np.array(preds)
 
-  for i in range(preds.shape[1]):  #over sample axis
-    x = preds[:, i]
-    Y_preds.append(mode(x[x!=-1])[0][0])      #Take the mode over values other than -1(none)
+  preds = preds.T
+  for i in range(preds.shape[0]):  #over sample axis
+    x = preds[i, :]
+    x = mode(x[x!=-1])
+    if x[0].shape==(0,):         #if all -1
+      md = np.random.randint(6)
+    else:
+      md = x[0][0]
+    
+    Y_preds.append(md)      #Take the mode over values other than -1(none)
 
   print(f"Y_preds: {Y_preds}")
   print("#####################################################")
