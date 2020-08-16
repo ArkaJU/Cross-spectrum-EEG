@@ -46,7 +46,7 @@ def extract_anns(path):
 
 #getting the EEG data for each patient->outputs labelwise dict of segments of EEG and another info dict
 #@profile
-def extract_data(path, ann, onset, last_seg_duration, preprocess):
+def extract_data(path, ann, onset, last_seg_duration, preprocess, return_stats=False):
   raw = mne.io.read_raw_edf(path, verbose=False)
   channel_names=raw.ch_names
   eeg_names='*EEG'
@@ -65,7 +65,7 @@ def extract_data(path, ann, onset, last_seg_duration, preprocess):
 
   x = data.tolist()[0]
   
-  eeg_dict = {0:[], 1:[], 2:[], 3:[], 4:[], 5:[]}
+  eeg_dict = {0:[], 1:[], 2:[], 3:[], 4:[]}
 
   for i in range(len(onset)-1): 
     try:          
@@ -86,15 +86,10 @@ def extract_data(path, ann, onset, last_seg_duration, preprocess):
     last_label = ann[-1]
     print(f"KeyError: {last_label}")
     pass
-    
-  info_dict = {}
-  for i in range(NUM_SLEEP_STAGES):
-    info_dict[SLEEP_STAGES_INV[i]] = len(eeg_dict[i])    #info regarding how many segments of each type in each patient's EEG
 
-  return_stats = True
   
   if return_stats:
     stats = [np.max(data), np.min(data), np.mean(data), np.std(data)]
-    return eeg_dict, info_dict, np.array(stats)  
+    return eeg_dict, np.array(stats)  
   else:
-    return eeg_dict, info_dict
+    return eeg_dict

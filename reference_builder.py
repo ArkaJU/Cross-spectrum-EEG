@@ -2,7 +2,7 @@ import os
 import numpy as np
 import time
 from extract import extract_anns, extract_data
-from constants import *
+from constants import TRAIN_DATA_PATH, TRAIN_ANN_PATH, NUM_SLEEP_STAGES
 
 
 patient_list = sorted(os.listdir(TRAIN_DATA_PATH))
@@ -45,7 +45,7 @@ class ReferenceBuilder:
   def __init__(self, num_patients, num_segs_chosen_per_patient_per_stage):
     self.num_patients = num_patients
     self.num_segs_chosen_per_patient_per_stage = num_segs_chosen_per_patient_per_stage 
-    self.reference_segments = {0:[], 1:[], 2:[], 3:[], 4:[], 5:[]} 
+    self.reference_segments = {0:[], 1:[], 2:[], 3:[], 4:[]} 
 
 
   def get_ref_dicts(self):
@@ -62,8 +62,13 @@ class ReferenceBuilder:
       
       ann, onset, duration = extract_anns(TRAIN_ANN_PATH + ann_ref)
       preprocess = 'std'
-      eeg_dict, info_dict = extract_data(TRAIN_DATA_PATH + ref, ann, onset, duration[-1], preprocess=preprocess)
+      eeg_dict = extract_data(TRAIN_DATA_PATH + ref, ann, onset, duration[-1], preprocess=preprocess)
       
+      len_dict = {}
+      for i in eeg_dict.keys(): 
+        len_dict[i] = len(eeg_dict[i])
+
+      print(len_dict)
       print(ref)
       print(ann_ref)
 

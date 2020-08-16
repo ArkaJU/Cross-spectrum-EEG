@@ -108,7 +108,7 @@ def correntropy(x, y, preprocessing='standardize'):
 
 #@profile
 def get_sums(W):
-  path = '/content/Cross-spectrum-EEG/datasets/matrix_masks/'
+  path = '/content/drive/My Drive/Cross-spectrum-EEG/datasets/matrix_masks/'
   
   row_mask = np.load(path + 'row_mask_6.npy', allow_pickle=True)  #mask matrices have fixed shape for same scale and time i.shape/j.shape=(263,3750)
   column_mask = np.load(path + 'column_mask_6.npy', allow_pickle=True) 

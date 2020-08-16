@@ -21,23 +21,25 @@ preprocessing = 'standardize'
 
 if train == True:
   t1 = time.time()
-  sleep_stages = [0,1,2,3,4,5] #clf_ids
+  sleep_stages = [0,1,2,3,4] #clf_ids
 
   print("Training model....")
-  i = 0
-  combos = list(combinations(list(range(6)), 2))[i*3:(i+1)*3]
-  #combos = list(combinations(list(range(6)), 2))
 
+  combos = list(combinations(list(range(NUM_SLEEP_STAGES)), 2))
+  #combos = list(combinations(list(range(6)), 2))
+  
   for idx, (clf_id1, clf_id2) in enumerate(combos):
 
     t2 = time.time()
     print("*****************************************************")
     print(f"{idx}. CLF_ID1: {clf_id1}, CLF_ID2: {clf_id2}")
 
-    data_list1 = np.load(f'/content/cleaned_data/clf_smote{clf_id1}.npy', allow_pickle=True)
-    data_list2 = np.load(f'/content/cleaned_data/clf_smote{clf_id2}.npy', allow_pickle=True)
+    data_list1 = np.load(f'/content/cleaned_data/clf{clf_id1}.npy', allow_pickle=True)
+    data_list2 = np.load(f'/content/cleaned_data/clf{clf_id2}.npy', allow_pickle=True)
 
     X_train, Y_train = split_datalist(data_list1, clf_id1, data_list2, clf_id2)
+
+    
     print(X_train.shape)
     print(f"Y_train: {np.unique(Y_train, return_counts=True)}")
     print(f"preprocessing: {preprocessing}")
@@ -84,23 +86,16 @@ if test == True:
   clf_02 = pickle.load(open(path + 'clf_02.sav','rb'))
   clf_03 = pickle.load(open(path + 'clf_03.sav','rb'))
   clf_04 = pickle.load(open(path + 'clf_04.sav','rb'))
-  clf_05 = pickle.load(open(path + 'clf_05.sav','rb'))
   clf_12 = pickle.load(open(path + 'clf_12.sav','rb'))
   clf_13 = pickle.load(open(path + 'clf_13.sav','rb'))
   clf_14 = pickle.load(open(path + 'clf_14.sav','rb'))
-  clf_15 = pickle.load(open(path + 'clf_15.sav','rb'))
   clf_23 = pickle.load(open(path + 'clf_23.sav','rb'))
   clf_24 = pickle.load(open(path + 'clf_24.sav','rb'))
-  clf_25 = pickle.load(open(path + 'clf_25.sav','rb'))
   clf_34 = pickle.load(open(path + 'clf_34.sav','rb'))
-  clf_35 = pickle.load(open(path + 'clf_35.sav','rb'))
-  clf_45 = pickle.load(open(path + 'clf_45.sav','rb'))
 
-  CLF = [clf_01, clf_02, clf_03, clf_04, clf_05, clf_12, clf_13, 
-        clf_14, clf_15, clf_23, clf_24, clf_25, clf_34, clf_35, clf_45]    # list of classifiers
+  CLF = [clf_01, clf_02, clf_03, clf_04, clf_12, clf_13, clf_14, clf_23, clf_24, clf_34]    # list of classifiers
 
-
-  test_set = np.load('/content/drive/My Drive/test_set_balanced_5_refs.npy', allow_pickle=True)
+  test_set = np.load('/content/drive/My Drive/ref5_dj6/test_set_balanced_ref5.npy', allow_pickle=True)
   test_set_dict = test_set.reshape(-1,1)[0][0]
   X_test, Y_test = split_dataset(test_set_dict)
   X_test = preprocess_test(X_test, preprocessing)
@@ -120,13 +115,17 @@ if test == True:
 
   preds = preds.T
   for i in range(preds.shape[0]):  #over sample axis
-    x = preds[i, :]
-    x = mode(x[x!=-1])
+    U = preds[i, :]
+    x = mode(U[U!=-1])
     if x[0].shape==(0,):         #if all -1
       md = np.random.randint(6)
     else:
       md = x[0][0]
-    
+    if md!=Y_test[i]:
+      print(U)
+      print(md)
+      print(Y_test[i])
+      print()
     Y_preds.append(md)      #Take the mode over values other than -1(none)
 
   print(f"Y_preds: {Y_preds}")

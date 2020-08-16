@@ -28,10 +28,10 @@ class Dataset():
     patient_ann = current_patient[:-4] + '-nsrr.xml'
     ann, onset, duration = extract_anns(self.ann_path + patient_ann)
     preprocess = None  #getting un-preprocessed segments
-    eeg_dict, info_dict, stat = extract_data(self.data_path + current_patient, ann, onset, duration[-1], preprocess=preprocess)
-    len_dict = {}
+    eeg_dict, stat = extract_data(self.data_path + current_patient, ann, onset, duration[-1], preprocess=preprocess, return_stats=True)
     self.stats.append(stat)
 
+    len_dict = {}
     for i in eeg_dict.keys(): 
       len_dict[i] = len(eeg_dict[i])
 
@@ -39,12 +39,12 @@ class Dataset():
     labels = []
     tuples = []    #all (label, segment)
 
-    for label in [1,4]:
+    for label in [1]:
       for seg in range(len_dict[label]): 
         selected_tuples.append((int(label), eeg_dict[label][seg]))
         labels.append(label)
 
-    for label in [0,2,3,5]:
+    for label in [0,2,3,4]:
       for seg in range(len_dict[label]): 
         tuples.append((int(label), eeg_dict[label][seg]))
 
@@ -78,7 +78,7 @@ class Dataset():
 
 data_set = Dataset(num_patients=NUM_CHOSEN_PATIENTS)  
 data_set.create(num_segs_chosen_per_patient=NUM_SEG_CHOSEN_PER_PATIENT)
-np.save(f"/content/drive/My Drive/data_set3.npy", data_set.data_list)
-np.save(f"/content/drive/My Drive/Cross-spectrum-EEG/datasets/stats/stats2.npy", data_set.stats)
+np.save(f"/content/drive/My Drive/data_set.npy", data_set.data_list)
+np.save(f"/content/drive/My Drive/Cross-spectrum-EEG/datasets/stats/stats.npy", data_set.stats)
 
 print(f"Total time: {time.time()-start} seconds")
