@@ -16,6 +16,6 @@ TEST_DATA_PATH = r"/content/drive/My Drive/NSRR/Data/test/"
 TEST_ANN_PATH = r"/content/drive/My Drive/NSRR/Annotations/test/"
 
 
-NUM_CHOSEN_PATIENTS = 160  
+NUM_CHOSEN_PATIENTS = 200  
 NUM_SEG_CHOSEN_PER_PATIENT = 200
 DJ = 6

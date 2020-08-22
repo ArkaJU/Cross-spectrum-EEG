@@ -25,7 +25,7 @@ signif (array like) – Significance levels as a function of scale.
 
 #@profile
 def feature_gen(s1, s2, Mean, Std):   
-
+#def feature_gen(s1, s2, mx, mn):   
 
   #time domain features
   f_t1 = np.max(s1)
@@ -44,6 +44,8 @@ def feature_gen(s1, s2, Mean, Std):
   f_t13 = np.where(np.diff(np.sign( [i for i in np.gradient(s1) if i] )))[0].shape[0] #slope sign change
 
   s1 = (s1-Mean)/Std  #pre-processing now
+  #s1 = (s1-mn)/(mx-mn)
+  
   dt = 1
   W_complex, _, _, _ = wavelet.xwt(s1, s2, dt, dj=1/DJ)                  
   W = np.abs(W_complex)   #row->scale, col->time

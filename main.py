@@ -1,3 +1,4 @@
+import copy
 import time
 import numpy as np
 import pickle
@@ -14,10 +15,34 @@ from utils import *
 
 start = time.time()
 
-train = False
+train = True
 test = True
 preprocessing = 'standardize'
 #preprocessing = 'normalize'
+
+#val
+# hyperparam_list = [ {'C':10,  'gamma':0.001, 'kernel':'rbf'},
+#                     {'C':100, 'gamma':0.001, 'kernel':'rbf'}, 
+#                     {'C':10,  'gamma':0.001, 'kernel':'rbf'},
+#                     {'C':10,  'gamma':0.001, 'kernel':'rbf'},
+#                     {'C':1,   'gamma':0.01,  'kernel':'rbf'},
+#                     {'C':1,   'gamma':0.01,  'kernel':'rbf'},
+#                     {'C':1,   'gamma':0.01,  'kernel':'rbf'},
+#                     {'C':1,   'gamma':0.01,  'kernel':'rbf'},
+#                     {'C':10,  'gamma':0.01,  'kernel':'rbf'},
+#                     {'C':1,   'gamma':0.01,  'kernel':'rbf'},]
+
+#test
+# hyperparam_list = [ {'C':100, 'gamma':0.001, 'kernel':'rbf'},
+#                     {'C':10,  'gamma':0.01,  'kernel':'rbf'}, 
+#                     {'C':10,  'gamma':0.001, 'kernel':'rbf'},
+#                     {'C':10,  'gamma':0.001, 'kernel':'rbf'},
+#                     {'C':1,   'gamma':0.01,  'kernel':'rbf'},
+#                     {'C':1,   'gamma':0.01,  'kernel':'rbf'},
+#                     {'C':10,  'gamma':0.001, 'kernel':'rbf'},
+#                     {'C':1,   'gamma':0.01,  'kernel':'rbf'},
+#                     {'C':10,  'gamma':0.01,  'kernel':'rbf'},
+#                     {'C':1,   'gamma':0.01,  'kernel':'rbf'},]
 
 if train == True:
   t1 = time.time()
@@ -58,6 +83,8 @@ if train == True:
       weights_dict[c] = w
 
     print(weights_dict)
+    # hparams = hyperparam_list[idx]
+    # print(hparams)
     clf = SVC(class_weight=weights_dict)
     clf.fit(X_train, Y_train)
 
@@ -101,31 +128,39 @@ if test == True:
   X_test = preprocess_test(X_test, preprocessing)
   print(X_test.shape)
   preds = []
-  Y_preds = []
   combos = list(combinations(list(range(NUM_SLEEP_STAGES)), 2))
 
   for idx, (clf_id1, clf_id2) in enumerate(combos):
     print(idx, clf_id1, clf_id2)
-
     pred = CLF[idx].predict(np.concatenate((X_test[clf_id1], X_test[clf_id2]), axis=1))
     print(np.unique(pred, return_counts=True))
     preds.append(pred)
 
   preds = np.array(preds)
-
   preds = preds.T
+
+  print()
+  print("Accuracies of individual classifiers:")
+  for i, (clf_id1,clf_id2) in enumerate(combos):
+    test_Y = copy.deepcopy(Y_test)
+    test_Y[np.where((test_Y != clf_id1) & (test_Y != clf_id2))[0].tolist()] = -1 #none
+    predictions = preds[:, i]
+    print(f"clf{clf_id1}{clf_id2}: {accuracy_score(test_Y, predictions)}")
+  print()
+
+  Y_preds = []
   for i in range(preds.shape[0]):  #over sample axis
     U = preds[i, :]
     x = mode(U[U!=-1])
     if x[0].shape==(0,):         #if all -1
-      md = np.random.randint(6)
+      md = np.random.randint(5)
     else:
       md = x[0][0]
-    if md!=Y_test[i]:
-      print(U)
-      print(md)
-      print(Y_test[i])
-      print()
+    # if md!=Y_test[i]:
+    #   print(U)
+    #   print(md)
+    #   print(Y_test[i])
+    #   print()
     Y_preds.append(md)      #Take the mode over values other than -1(none)
 
   print(f"Y_preds: {Y_preds}")

@@ -148,8 +148,8 @@ def split_dataset(data_dict: dict) -> [np.ndarray, list]:
   """
   data_dict -> labelwise dict of (selected_seg_label, avg feature_vector of ref_label: selected_seg X ref_seg)
   """
-  X_0, X_1, X_2, X_3, X_4, X_5 = ([] for _ in range(NUM_SLEEP_STAGES)) #initializing 6 empty strings
-  X = [X_0, X_1, X_2, X_3, X_4, X_5]
+  X_0, X_1, X_2, X_3, X_4 = ([] for _ in range(NUM_SLEEP_STAGES)) #initializing 6 empty strings
+  X = [X_0, X_1, X_2, X_3, X_4]
   
   #features_to_keep = [0,1,2,5,6,7,9,13,16,18,19,20,21,25,26,27,28,29,30,31]
   # features_to_keep = list(range(17))+list(range(24,32))
@@ -171,7 +171,7 @@ def split_dataset(data_dict: dict) -> [np.ndarray, list]:
   for tup in data_dict[clf_id]:   
     Y.append(tup[0]) 
 
-  return np.array(X), Y         #(num_sleep_stages, total_samples, num_features), num_samples
+  return np.array(X), np.array(Y)         #(num_sleep_stages, total_samples, num_features), num_samples
 
 
 def split_datalist(data_list1: np.ndarray, clf_id1: int, data_list2: np.ndarray, clf_id2: int) -> [np.ndarray, np.ndarray]:    
