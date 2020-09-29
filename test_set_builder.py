@@ -19,13 +19,12 @@ class TestSetBuilder:
     
     self.size = size
     self.testset_dict ={0:[], 1:[], 2:[], 3:[], 4:[]}
-    self.ref_segments = np.load('/content/drive/My Drive/Cross-spectrum-EEG_2/datasets/ref-EEG/reference_segments_5_EEG_channel.npy', allow_pickle=True).reshape(-1, 1)[0][0]
+    self.ref_segments = np.load('/content/drive/My Drive/Cross-spectrum-EEG/datasets/ref-EEG/reference_segments_5_EEG_channel.npy', allow_pickle=True).reshape(-1, 1)[0][0]
     
     print(f"Refs loaded in {time.time()-start} seconds")
 
 
-  def generate_features_with_ref_segments(self, selected_tuple, patient_no, mean, std):
-      
+  def generate_features_with_ref_segments(self, selected_tuple):  
     selected_label = selected_tuple[0]
     selected_segment = selected_tuple[1]
     s1 = np.array(selected_segment)
@@ -36,7 +35,7 @@ class TestSetBuilder:
         s2 = np.array(ref_segment)
 
         try:
-          F = feature_gen(s1, s2, mean, std)
+          F = feature_gen(s1, s2)
           F_avg.append(F)
         except Warning:
           print("Warning encountered")
@@ -47,7 +46,8 @@ class TestSetBuilder:
         
   def extract_test_segments_for_given_patient(self, patient_no):   #helper
 
-    current_patient = patient_list[patient_no]  
+    current_patient = patient_list[patient_no] 
+    print(current_patient) 
     patient_ann = current_patient[:-4] + '-nsrr.xml'
     ann, onset, duration = extract_anns(TEST_ANN_PATH + patient_ann)
     preprocess = None  #no-preprocessing
@@ -62,7 +62,7 @@ class TestSetBuilder:
     for i in eeg_dict.keys():
       if len_dict[i]!=0:
         #print(f"Label: {i}: {len_dict[i]}")
-        if i==1:
+        if i==1 or i==3:
           seg_indices = np.random.choice(len(eeg_dict[i]), min(11, len(eeg_dict[i])), replace=False)
           for j in seg_indices:
             selected_tuples.append((int(i), eeg_dict[i][j]))
@@ -86,9 +86,10 @@ class TestSetBuilder:
       
       segment_generator = self.extract_test_segments_for_given_patient(patient_no=p)
       for segment, stats in segment_generator:
-        mean = stats[2]
-        std = stats[3]
-        self.generate_features_with_ref_segments(segment, p, mean, std)
+        # mean = stats[2]
+        # std = stats[3]
+        self.generate_features_with_ref_segments(segment)
+        #self.generate_features_with_ref_segments(segment, p, mean, std)
         segs.append(segment[0])  
 
       segs_global = segs_global + segs
@@ -96,7 +97,7 @@ class TestSetBuilder:
       print(f"segs_global: {np.unique(segs_global, return_counts=True)}")
       print(f"Time taken so far: {time.time()-start} seconds")
       print("\n")
-      np.save(os.path.join(save_path, f"ref{len(self.ref_segments[0])}_dj{DJ}", "test_set_balanced_ref5.npy"), dataset.testset_dict)
+      np.save(os.path.join(save_path, f"dj6_76f", "test_set_balanced_ref5.npy"), dataset.testset_dict)
       
     print("########################")
     print("\n")

@@ -97,9 +97,9 @@ def correntropy(x, y, preprocessing='standardize'):
     #N = len(x)
     X = preprocess(x, preprocessing)
     Y = preprocess(y, preprocessing)
-    s = np.std(X, axis=0)
+    sigma = np.std(X, axis=0)*6
     #print(f"std dev: {s}")
-    V = np.exp(-0.5*np.square(X - Y)/s**2)
+    V = (1/(np.sqrt(2*np.pi*sigma)))*np.exp(-0.5*np.square(X - Y)/sigma**2)
     #CIP = 0.0 # mean in feature space should be subtracted!!
     #for i in range(0, N):
         #CIP += np.average(np.exp(-0.5*(x- y[i])**2/s**2))/N
@@ -107,18 +107,29 @@ def correntropy(x, y, preprocessing='standardize'):
 
 
 #@profile
-def get_sums(W):
-  path = '/content/drive/My Drive/Cross-spectrum-EEG/datasets/matrix_masks/'
+def get_sums(W, inv):
+  path = '/content/Cross-spectrum-EEG/datasets/matrix_masks/'
   
-  row_mask = np.load(path + 'row_mask_6.npy', allow_pickle=True)  #mask matrices have fixed shape for same scale and time i.shape/j.shape=(263,3750)
-  column_mask = np.load(path + 'column_mask_6.npy', allow_pickle=True) 
-  
-  accum = np.multiply(W, np.multiply(row_mask+1, column_mask+1))
+  #NOTE:to make it independent of time, not using column_mask
+  if inv==True:
+    row_mask = np.load(path + 'row_mask_6_inverse.npy', allow_pickle=True)  
+    column_mask = np.load(path + 'column_mask_6_inverse.npy', allow_pickle=True) 
+  else:
+    row_mask = np.load(path + 'row_mask_6.npy', allow_pickle=True)  
+    column_mask = np.load(path + 'column_mask_6.npy', allow_pickle=True) 
+
+  accum = np.multiply(W, row_mask+1)
   accum = np.sum(accum)
-  accum_sq = np.multiply(W, np.multiply((row_mask+1)**2, (column_mask+1)**2))
+  accum_2 = np.multiply(W, np.multiply(row_mask+1, column_mask+1))
+  accum_2 = np.sum(accum_2)
+
+  accum_sq = np.multiply(W, (row_mask+1)**2)
   accum_sq = np.sum(accum_sq)
+  accum_sq_2 = np.multiply(W, np.multiply((row_mask+1)**2, (column_mask+1)**2))
+  accum_sq_2 = np.sum(accum_sq_2)
   
-  return accum, accum_sq
+  
+  return accum, accum_sq, accum_2, accum_sq_2
 
 
 #@profile
@@ -180,13 +191,21 @@ def split_datalist(data_list1: np.ndarray, clf_id1: int, data_list2: np.ndarray,
   clf_id -> signifies which SVM this data is meant for
   """
   # print(f"clf_id:{clf_id}")
+  most_imp_features = [[11, 12, 15, 2,  6,  8,  18,  0,  4,  1,  38, 39, 21, 19, 14, 3, 13, 29, 10,  7,  5, 20, 45, 40, 16],
+                     [12, 11, 4,  1,  0,  3,  18,  10, 6,  15, 2,  5,  7,  8,  14, 20,13, 19, 29, 38, 39, 44, 42, 45, 40],
+                     [12, 11, 6,  4,  0,  1,  15,  2,  3,  10, 18, 8,  20, 14, 7,  5, 29, 13, 22, 19, 21, 30, 16, 39, 38],
+                     [12, 11, 4,  0,  1,  18, 3,  10,  2,  5,  6,  15, 7,  14, 13, 29, 8, 20,  9, 19, 17, 25, 30, 16, 27],
+                     [12,  4, 1,  11, 0,  3,  10,  6,  18, 15, 2,  5,  8,  7,  14, 20, 13, 19, 9, 29, 44, 22, 39, 38, 42]]
+
 
   X1 = np.array(list(data_list1[:, 1]))
   X1 = np.stack([x for x in X1])
+  #X1 = X1[:, most_imp_features[clf_id1][:upto]]
   Y1 = np.array(data_list1[:, 0]).astype('int')
 
   X2 = np.array(list(data_list2[:, 1]))
   X2 = np.stack([x for x in X2])
+  #X2 = X2[:, most_imp_features[clf_id2][:upto]]
   Y2 = np.array(data_list2[:, 0]).astype('int')
 
   X = np.concatenate((X1,X2), axis=1)
